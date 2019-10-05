@@ -7,12 +7,12 @@
   },
   "main": "server.js",
   "scripts": {
-    "client-install": "npm install --prefix client",
+    "client-install": "npm install --prefix new_client",
     "start": "node server.js",
     "server": "nodemon server.js",
-    "client": "npm start --prefix client",
+    "client": "npm start --prefix new_client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix new_client && npm run build --prefix new_client"
   },
   "author": "Jesse Gottlieb",
   "license": "ISC",
