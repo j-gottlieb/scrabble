@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {getWordFrequencies, getDictionary, getNewGame} from './service/words.js';
+import {getGames, getDictionary, getNewGame} from './service/words.js';
 import {signup} from './service/authentication';
 import {
   isValidTurn
@@ -32,16 +32,18 @@ class App extends Component {
   }
 
   submitMove = () => {
-    if (!isValidTurn(this.state.game.board)) {
-      this.setState({isInvalidMove: true})
-      return
-    }
-    const socket = socketIOClient('localhost:3000');
-    const {game, playerLetters} = this.state;
-    socket.emit('submit-move', {
-      game,
-      playerLetters
-    })
+    getGames()
+      .then(games => console.log(games))
+    // if (!isValidTurn(this.state.game.board)) {
+    //   this.setState({isInvalidMove: true})
+    //   return
+    // }
+    // const socket = socketIOClient('localhost:3000');
+    // const {game, playerLetters} = this.state;
+    // socket.emit('submit-move', {
+    //   game,
+    //   playerLetters
+    // })
   }
 
   sendMessage = () => {
@@ -49,11 +51,11 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-    const socket = socketIOClient('localhost:3000');
-
-    socket.on('new-game', this.updateBoard)
-
-    socket.on('game-update', this.updateBoard)
+    // const socket = socketIOClient('localhost:3000');
+    //
+    // socket.on('new-game', this.updateBoard)
+    //
+    // socket.on('game-update', this.updateBoard)
   }
 
   updateBoard = ({game: {_id, board, letterPool}, newHand}) => {
