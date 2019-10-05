@@ -1,0 +1,37 @@
+{
+  "name": "scrabble",
+  "version": "1.0.0",
+  "description": "Scrabble remake",
+  "engines": {
+    "node": "12.11.1"
+  },
+  "main": "server.js",
+  "scripts": {
+    "client-install": "npm install --prefix client",
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+  },
+  "author": "Jesse Gottlieb",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "concurrently": "^4.1.2",
+    "express": "^4.17.1",
+    "mongoose": "^5.7.3",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j-gottlieb/scrabble.git"
+  },
+  "bugs": {
+    "url": "https://github.com/j-gottlieb/scrabble/issues"
+  },
+  "homepage": "https://github.com/j-gottlieb/scrabble#readme"
+}
