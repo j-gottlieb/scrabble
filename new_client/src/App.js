@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import {getGames, getDictionary, getNewGame} from './service/words.js';
-import {signup} from './service/authentication';
+import {getGames} from './service/words.js';
+import {signUp, signIn} from './service/authentication';
 import {
   isValidTurn
 } from './constants';
@@ -9,14 +10,20 @@ import {
 // import './App.css'
 import PlayerLetters from './components/player_letters';
 import BoardSquare from './components/board_square';
-import SignupModal from'./components/signup_modal';
+import AuthModal from'./components/auth_modal';
 import {Alert, Toast} from 'reactstrap';
 import socketIOClient from "socket.io-client";
+import NavBar from './components/nav_bar'
 
 class App extends Component {
   state = {
     wordFrequencies: [],
     isLoading: false,
+    playerInfo: {
+      id: null,
+      token: null,
+      username: ''
+    },
     game: {
       _id: null,
       board: null,
@@ -28,7 +35,8 @@ class App extends Component {
       index: null
     },
     isInvalidMove: false,
-    showSignupModal: false
+    showSignupModal: false,
+    showSigninModal: false,
   }
 
   submitMove = () => {
@@ -46,9 +54,9 @@ class App extends Component {
     // })
   }
 
-  sendMessage = () => {
-    getDictionary()
-  }
+  // sendMessage = () => {
+  //   getDictionary()
+  // }
 
   componentDidMount = () => {
     // const socket = socketIOClient('localhost:3000');
@@ -116,21 +124,54 @@ class App extends Component {
   }
 
   onSignup = (username, password) => {
-    signup(username, password)
+    signUp(username, password)
       .then(res => {
         console.log(res)
+        this.setState({
+          playerInfo: {
+            token: res.token,
+            id: res.id
+          }
+        })
       })
       .catch(err => {
         console.log(err)
       })
   }
 
+  onSignin = (username, password) => {
+    signIn(username, password)
+      .then(({token, user: {id, username}}) => {
+        console.log(token, id, username)
+        this.setState({
+          playerInfo: {
+            token,
+            id,
+            username
+          }
+        })
+        this.showAuthModal('showSigninModal', false)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  showAuthModal = (whichModal, shouldShow) => {
+    this.setState({
+      [whichModal]: shouldShow
+    })
+  }
+
   render() {
     return (
       <>
-        <button onClick={getNewGame}>New Game</button>
-        <button onClick={this.submitMove}>Submit Move</button>
-        <button onClick={() => this.setState({showSignupModal: true})}>Sign Up</button>
+      <NavBar
+        submitMove={this.submitMove}
+        toggleSignUp={() => this.showAuthModal('showSignupModal', true)}
+        toggleSignIn={() => this.showAuthModal('showSigninModal', true)}
+        username={this.state.playerInfo.username}
+      />
         {this.state.isInvalidMove &&
           <Toast onClose={() => this.setState({isInvalidMove: false})} show={this.state.isInvalidMove} delay={3000} autohide>
             <Alert variant="warning">
@@ -151,12 +192,18 @@ class App extends Component {
             </div>
           )
         }
-        {this.state.showSignupModal &&
-          <SignupModal
-            onCloseSignupModal={() => this.setState({showSignupModal: false})}
-            onSignup={this.onSignup}
-          />
-        }
+        <AuthModal
+          isSignIn={false}
+          showAuthModal={this.state.showSignupModal}
+          onCloseAuthModal={() => this.showAuthModal('showSignupModal', false)}
+          authSubmission={this.onSignup}
+        />
+        <AuthModal
+          isSignIn={true}
+          showAuthModal={this.state.showSigninModal}
+          onCloseAuthModal={() => this.showAuthModal('showSigninModal', false)}
+          authSubmission={this.onSignin}
+        />
       </>
     );
   }

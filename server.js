@@ -1,29 +1,32 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
-
-const games = require('./routes/api/games');
+const config = require('config');
 
 const app = express();
 
 // Bodyparser Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(cors());
 
 // DB config
-const db = require('./config/keys').mongoURI
+const db = config.get('mongoURI');
 
 // Connect to mongo
 mongoose
-  .connect(db, { useNewUrlParser: true })
+  .connect(db, {
+    useNewUrlParser: true,
+    useCreateIndex: true
+  })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
 // Use routes
-app.use('/api/games', games);
+app.use('/api/games', require('./routes/api/games'));
+app.use('/api/users', require('./routes/api/users'));
+app.use('/api/auth', require('./routes/api/auth'));
 
 // Serve static assets in in prod
 if (process.env.NODE_ENV === 'production') {
