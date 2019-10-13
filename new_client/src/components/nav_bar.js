@@ -1,16 +1,10 @@
 import React from 'react';
 import {
-  Collapse,
   Navbar,
-  NavbarToggler,
   NavbarBrand,
   Nav,
   NavItem,
-  NavLink,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem
+  NavLink
 } from 'reactstrap';
 
 const NavBar = props => (
@@ -19,6 +13,9 @@ const NavBar = props => (
          <NavbarBrand href="/">fLexicon</NavbarBrand>
          {props.username && <h3>{`Welcome, ${props.username}`}</h3>}
            <Nav className="ml-auto" navbar>
+             <NavItem>
+               <NavLink onClick={props.newGame}>Start New Game</NavLink>
+             </NavItem>
              <NavItem>
                <NavLink onClick={props.submitMove}>Submit Move</NavLink>
              </NavItem>

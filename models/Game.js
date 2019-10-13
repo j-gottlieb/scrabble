@@ -8,6 +8,11 @@ const GameSchema = new Schema({
   }],
   letterPool: [{
     type: String
+  }],
+  words: [{
+    word: String,
+    score: Number,
+    playerId: mongoose.Schema.Types.ObjectId
   }]
 });
 

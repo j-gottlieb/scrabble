@@ -1,19 +1,15 @@
 import React, {Component} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import {getGames} from './service/words.js';
+import {getNewGame} from'./service/game.js';
 import {signUp, signIn} from './service/authentication';
-import {
-  isValidTurn
-} from './constants';
-// import 'bootstrap/dist/css/bootstrap.min.css'
-// import './App.css'
 import PlayerLetters from './components/player_letters';
 import BoardSquare from './components/board_square';
 import AuthModal from'./components/auth_modal';
-import {Alert, Toast} from 'reactstrap';
+import {Alert, Toast, Container, Row, Col} from 'reactstrap';
 import socketIOClient from "socket.io-client";
 import NavBar from './components/nav_bar'
+import GameStats from './components/game_stats';
 
 class App extends Component {
   state = {
@@ -27,46 +23,39 @@ class App extends Component {
     game: {
       _id: null,
       board: null,
-      letterPool: null
+      letterPool: null,
+      words: []
     },
     playerLetters: [],
     selectedLetter: {
       letter: null,
       index: null
     },
+    players: {},
     isInvalidMove: false,
     showSignupModal: false,
     showSigninModal: false,
   }
 
   submitMove = () => {
-    getGames()
-      .then(games => console.log(games))
-    // if (!isValidTurn(this.state.game.board)) {
-    //   this.setState({isInvalidMove: true})
-    //   return
-    // }
-    // const socket = socketIOClient('localhost:3000');
-    // const {game, playerLetters} = this.state;
-    // socket.emit('submit-move', {
-    //   game,
-    //   playerLetters
-    // })
+    const socket = socketIOClient('localhost:3000');
+    const {game, playerLetters, playerInfo} = this.state;
+    socket.emit('submit-move', {
+      game,
+      playerLetters,
+      playerId: playerInfo.id
+    })
   }
-
-  // sendMessage = () => {
-  //   getDictionary()
-  // }
 
   componentDidMount = () => {
-    // const socket = socketIOClient('localhost:3000');
-    //
-    // socket.on('new-game', this.updateBoard)
-    //
-    // socket.on('game-update', this.updateBoard)
+    const socket = socketIOClient('localhost:5000');
+
+    socket.on('new-game', this.updateBoard)
+
+    socket.on('game-update', this.updateBoard)
   }
 
-  updateBoard = ({game: {_id, board, letterPool}, newHand}) => {
+  updateBoard = ({game: {_id, board, letterPool, words}, newHand, playerId}) => {
     const newBoard = board.map(square => {
       if (square.letter === '') {
         return {...square, isValidPosition: true}
@@ -74,7 +63,12 @@ class App extends Component {
         return {...square, isValidPosition: false}
       }
     })
-    this.setState({game: {_id, board: newBoard, letterPool}, playerLetters: newHand})
+    this.setState(prevState => {
+      return {
+        game: {_id, board: newBoard, letterPool, words},
+        playerLetters: newHand
+      }
+    })
   }
 
   getBoardGrid = () =>
@@ -100,27 +94,46 @@ class App extends Component {
 
   handleInputLetter = (e, index) => {
     const {letter, index: selectedLetterIndex} = this.state.selectedLetter
-    if (letter == null || !this.state.game.board[index].isValidPosition) return;
-    this.setState(prevState => {
-      const playerLetters = [...prevState.playerLetters]
-      if (prevState.game.board[index].letter === '') {
-        playerLetters.splice(selectedLetterIndex, 1)
-      } else {
-        playerLetters.splice(selectedLetterIndex, 1, prevState.game.board[index].letter)
-      }
-      return {
-        game: {
-          ...prevState.game,
-          board: [
-            ...prevState.game.board.slice(0, index),
-            {letter, isValidPosition: true},
-            ...prevState.game.board.slice(index + 1)
-          ],
-        },
-        selectedLetter: {letter: null, index: null},
-        playerLetters
-      }
-    })
+    if (!this.state.game.board[index].isValidPosition) return;
+
+    if (letter == null && this.state.game.board[index].letter !== '' && this.state.game.board[index].isValidPosition) {
+      this.setState(prevState => {
+        const playerLetters = [...prevState.playerLetters, this.state.game.board[index].letter];
+        return {
+          game: {
+            ...prevState.game,
+            board: [
+              ...prevState.game.board.slice(0, index),
+              {...prevState.game.board[index], letter: ''},
+              ...prevState.game.board.slice(index + 1)
+            ],
+          },
+          selectedLetter: {letter: null, index: null},
+          playerLetters
+        }
+      })
+    } else {
+      this.setState(prevState => {
+        const playerLetters = [...prevState.playerLetters]
+        if (prevState.game.board[index].letter === '') {
+          playerLetters.splice(selectedLetterIndex, 1)
+        } else {
+          playerLetters.splice(selectedLetterIndex, 1, prevState.game.board[index].letter)
+        }
+        return {
+          game: {
+            ...prevState.game,
+            board: [
+              ...prevState.game.board.slice(0, index),
+              {...prevState.game.board[index], letter},
+              ...prevState.game.board.slice(index + 1)
+            ],
+          },
+          selectedLetter: {letter: null, index: null},
+          playerLetters
+        }
+      })
+    }
   }
 
   onSignup = (username, password) => {
@@ -142,7 +155,6 @@ class App extends Component {
   onSignin = (username, password) => {
     signIn(username, password)
       .then(({token, user: {id, username}}) => {
-        console.log(token, id, username)
         this.setState({
           playerInfo: {
             token,
@@ -163,10 +175,33 @@ class App extends Component {
     })
   }
 
+  onGetNewGame = () => {
+    getNewGame(this.state.playerInfo.id)
+  }
+
+  getBoardGrid = () =>
+    this.state.game.board.map(({letter}, index) => (
+        <BoardSquare
+          letter={letter}
+          index={index}
+          onInputLetter={this.handleInputLetter}
+        />
+      )
+    );
+
+    getPlayerWords = () =>
+      this.state.game.words.reduce((allWords, {word, playerId, score}) => {
+        allWords[playerId] = allWords[playerId]
+        ? [...allWords[playerId], {word, score}]
+        : [{word, score}]
+        return allWords
+      }, {})
+
   render() {
     return (
       <>
       <NavBar
+        newGame={this.onGetNewGame}
         submitMove={this.submitMove}
         toggleSignUp={() => this.showAuthModal('showSignupModal', true)}
         toggleSignIn={() => this.showAuthModal('showSigninModal', true)}
@@ -185,13 +220,24 @@ class App extends Component {
           onUnselectLetter={this.handleUnSelectLetter}
           selectedLetter={this.state.selectedLetter}
         />
-        {this.state.game.board != null &&
-          (
-            <div className="board">
-              {this.getBoardGrid()}
-            </div>
-          )
-        }
+        <Container>
+          <Row>
+            <Col>
+              {this.state.game.board != null &&
+                (
+                  <div className="board">
+                    {this.getBoardGrid()}
+                  </div>
+                )
+              }
+            </Col>
+            <Col>
+              <GameStats
+                players={this.getPlayerWords()}
+              />
+            </Col>
+          </Row>
+        </Container>
         <AuthModal
           isSignIn={false}
           showAuthModal={this.state.showSignupModal}

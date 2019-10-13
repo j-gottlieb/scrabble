@@ -1,12 +1,23 @@
 import React from 'react';
-// import {ButtonToolbar, ToggleButtonGroup, ToggleButton} from 'reactstrap';
+import {ButtonToolbar, Button, ButtonGroup} from 'reactstrap';
 
 
-const PlayerLetters = ({player, letters, selectedLetter: {letter, index}, onSelectLetter, onUnselectLetter}) => (
+const PlayerLetters = ({player, letters, selectedLetter, onSelectLetter, onUnselectLetter}) => (
   <>
     <p>Your Letters: </p>
-
-    </>
+    <ButtonToolbar>
+      {letters.map((letter, index) => (
+        <ButtonGroup>
+          <Button
+            active={letter === selectedLetter.letter}
+            onClick={() => onSelectLetter(index)}
+          >
+            {letter}
+          </Button>
+        </ButtonGroup>
+      ))}
+    </ButtonToolbar>
+  </>
 )
 
 
