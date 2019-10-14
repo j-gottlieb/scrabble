@@ -10,6 +10,7 @@ import {Alert, Toast, Container, Row, Col} from 'reactstrap';
 import socketIOClient from "socket.io-client";
 import NavBar from './components/nav_bar'
 import GameStats from './components/game_stats';
+import GameControls from './components/game_controls';
 
 class App extends Component {
   state = {
@@ -33,6 +34,7 @@ class App extends Component {
     },
     players: {},
     isInvalidMove: false,
+    authMessage: '',
     showSignupModal: false,
     showSigninModal: false,
   }
@@ -147,8 +149,8 @@ class App extends Component {
           }
         })
       })
-      .catch(err => {
-        console.log(err)
+      .catch(({message}) => {
+        this.setState({authMessage: message})
       })
   }
 
@@ -159,13 +161,14 @@ class App extends Component {
           playerInfo: {
             token,
             id,
-            username
+            username,
+            authMessage: ''
           }
         })
         this.showAuthModal('showSigninModal', false)
       })
-      .catch(err => {
-        console.log(err)
+      .catch(({message}) => {
+        this.setState({authMessage: message})
       })
   }
 
@@ -214,12 +217,20 @@ class App extends Component {
             </Alert>
           </Toast>
         }
-        <PlayerLetters
-          letters={this.state.playerLetters}
-          onSelectLetter={this.handleSelectLetter}
-          onUnselectLetter={this.handleUnSelectLetter}
-          selectedLetter={this.state.selectedLetter}
-        />
+        {this.state.playerInfo.id &&
+          <GameControls
+            onNewGame={this.onGetNewGame}
+            onSubmitMove={this.submitMove}
+          />
+        }
+        {this.state.game._id != null &&
+          <PlayerLetters
+            letters={this.state.playerLetters}
+            onSelectLetter={this.handleSelectLetter}
+            onUnselectLetter={this.handleUnSelectLetter}
+            selectedLetter={this.state.selectedLetter}
+          />
+        }
         <Container>
           <Row>
             <Col>
@@ -243,12 +254,14 @@ class App extends Component {
           showAuthModal={this.state.showSignupModal}
           onCloseAuthModal={() => this.showAuthModal('showSignupModal', false)}
           authSubmission={this.onSignup}
+          message={this.state.authMessage}
         />
         <AuthModal
           isSignIn={true}
           showAuthModal={this.state.showSigninModal}
           onCloseAuthModal={() => this.showAuthModal('showSigninModal', false)}
           authSubmission={this.onSignin}
+          message={this.state.authMessage}
         />
       </>
     );

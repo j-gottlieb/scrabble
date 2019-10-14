@@ -7,7 +7,8 @@ import {
   Form,
   FormGroup,
   Label,
-  Input
+  Input,
+  Alert
 } from 'reactstrap';
 
 class AuthModal extends Component {
@@ -34,6 +35,7 @@ class AuthModal extends Component {
              <Input onChange={e => this.setState({password: e.target.value})} type="password" name="password" id="password" placeholder="enter a password" />
            </FormGroup>
            <Button type="submit">{this.props.isSignIn ? 'Sign In' : 'Sign Up'}</Button>
+           {this.props.message !== '' && <Alert color="danger">{this.props.message}</Alert>}
          </Form>
        </ModalBody>
      </Modal>
@@ -42,9 +44,3 @@ class AuthModal extends Component {
 }
 
 export default AuthModal;
-
-
-// <ModalFooter>
-//   <Button onClick={this.props.onCloseSignupModal} color="secondary">Cancel</Button>{' '}
-//   <Button onClick={() => this.props.authSubmission(this.state.username, this.state.password)} color="primary">{this.props.isSignIn ? 'Sign In' : 'Sign Up'}</Button>
-// </ModalFooter>
