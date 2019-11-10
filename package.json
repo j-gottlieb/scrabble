@@ -7,6 +7,7 @@
   },
   "main": "server.js",
   "scripts": {
+    "test": "jest",
     "client-install": "npm install --prefix client",
     "start": "node server.js",
     "server": "nodemon server.js",
@@ -18,9 +19,13 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0-rc.3",
     "concurrently": "^4.1.2",
     "config": "^3.2.3",
     "cors": "^2.8.5",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.16.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6-alpha.5",
     "fast-csv": "^3.4.0",
@@ -28,9 +33,15 @@
     "json2csv": "^4.5.4",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.7.3",
+    "redux": "^4.0.4",
+    "request": "^2.88.0",
+    "reselect": "^4.0.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-plugin-import": "^2.18.2",
+    "jest": "^24.9.0",
     "nodemon": "^1.19.3"
   },
   "repository": {

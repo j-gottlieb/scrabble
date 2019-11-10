@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs');
 const config = require('config');
 const jwt = require('jsonwebtoken');
 const auth = require('../../middleware/auth');
+const Game = require('../../models/Game');
 
-// Games model
+// User model
 const User = require('../../models/User');
 
 // @route post api/auth
@@ -33,12 +34,16 @@ router.post('/', (req, res) => {
             (err, token) => {
               if (err) throw err;
 
-              res.json({
-                token,
-                user: {
-                  id: user.id,
-                  username: user.username
-                }
+              //get active games
+              Game.find({isActive: true}, (err, activeGames) => {
+                res.json({
+                  token,
+                  user: {
+                    id: user.id,
+                    username: user.username
+                  },
+                  activeGames
+                })
               })
             }
           )

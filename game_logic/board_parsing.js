@@ -1,4 +1,4 @@
-getNewWords = (oldWords, board, playerId) =>
+const getNewWords = (oldWords, board, playerId) =>
   getAllWords(board)
     .filter(word => !oldWords.includes(word))
 

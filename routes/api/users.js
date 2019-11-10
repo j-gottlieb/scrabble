@@ -35,13 +35,17 @@ router.post('/', (req, res) => {
                 { expiresIn: 3600},
                 (err, token) => {
                   if (err) throw err;
-
-                  res.json({
-                    token,
-                    user: {
-                      id,
-                      username
-                    }
+                  
+                  //get active games
+                  Game.find({isActive: true}, (err, activeGames) => {
+                    res.json({
+                      token,
+                      user: {
+                        id: user.id,
+                        username: user.username
+                      },
+                      activeGames
+                    })
                   })
                 }
               )

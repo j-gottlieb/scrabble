@@ -6,6 +6,12 @@ const GameSchema = new Schema({
     letter: String,
     isValidPosition: Boolean
   }],
+  hands: [{
+    letters: [{
+      type: String
+    }],
+    playerId: mongoose.Schema.Types.ObjectId
+  }],
   letterPool: [{
     type: String
   }],
@@ -13,7 +19,19 @@ const GameSchema = new Schema({
     word: String,
     score: Number,
     playerId: mongoose.Schema.Types.ObjectId
-  }]
+  }],
+  players: [{
+    playerId: mongoose.Schema.Types.ObjectId,
+    isOwner: Boolean
+  }],
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  turnNumber: {
+    type: Number,
+    default: 0
+  }
 });
 
 module.exports = Game = mongoose.model('game', GameSchema);

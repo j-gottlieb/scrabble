@@ -1,5 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Table, Card, CardTitle, CardBody} from 'reactstrap';
+import {connect} from 'react-redux';
+import {getPlayerWords} from '../selectors';
 
 const getTotalScore = playerWords =>
   playerWords.reduce((sum, {score}) => sum += score, 0)
@@ -30,4 +33,12 @@ const GameStats = ({players}) => (
   </>
 );
 
-export default GameStats
+const mapStateToProps = state => ({
+  players: getPlayerWords(state)
+})
+
+GameStats.propTypes = {
+  players: PropTypes.object
+}
+
+export default connect(mapStateToProps)(GameStats)

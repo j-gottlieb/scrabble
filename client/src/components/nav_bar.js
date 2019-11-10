@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Navbar,
   NavbarBrand,
@@ -6,6 +7,11 @@ import {
   NavItem,
   NavLink
 } from 'reactstrap';
+import {connect} from 'react-redux';
+import {
+  onToggleSignInModal,
+  onToggleSignUpModal
+} from '../actions'
 
 const NavBar = props => (
   <div>
@@ -24,4 +30,21 @@ const NavBar = props => (
      </div>
 );
 
-export default NavBar
+const mapStateToProps = state => ({
+  isUserLoggedIn: !!state.playerInfo.id,
+  username: state.playerInfo.username
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  toggleSignIn: () => dispatch(onToggleSignInModal()),
+  toggleSignUp: () => dispatch(onToggleSignUpModal())
+})
+
+NavBar.propTypes = {
+  isUserLoggedIn: PropTypes.bool.isRequired,
+  username: PropTypes.string.isRequired,
+  toggleSignIn: PropTypes.func.isRequired,
+  toggleSignUp: PropTypes.func.isRequired
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(NavBar)
