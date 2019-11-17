@@ -68,3 +68,10 @@ export const getPlayerHand = createSelector(
     }
   }
 )
+
+export const getActiveGameId = createSelector(
+  getCurrentGame,
+  ({_id}) => _id != null ? _id : null
+)
+
+export const getIsActiveGame = state => state.game.board.length > 0

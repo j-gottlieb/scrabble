@@ -52,24 +52,25 @@ io.on('connection', client => {
   client.on('new-game', ({playerId}) => {
     saveNewGame(playerId)
       .then(game => {
-        io.sockets.emit('new-game', game);
+        io.sockets.emit(`new-game-${playerId}`, game);
       })
   })
 
   // JOIN GAME
   client.on('join-game', ({gameId, playerId}) => {
-    joinGame(gameId, playerId)
-      .then(game => {
-        io.sockets.emit('player-joined-game', game)
-      })
+    client.join('new-room');
+    client.to('new-room').emit('player-joined-game', `${playerId} joined the room!`);
+
+    io.in('new-room').emit('player-joined-game', `${playerId} joined the room!`);
+    io.sockets.in('new-room').emit('player-joined-game', `${playerId} joined the room!`);
+    // client.emit('player-joined-game', `${playerId} joined the room!`)
   })
 
   // SUBMIT MOVE
   client.on('submit-move', ({game, playerId}) => {
     submitMove(game, playerId)
-      .then(response => {
-        console.log(response)
-        io.sockets.emit('game-update', response);
+      .then(updatedGame => {
+        io.sockets.emit(`game-update-${updatedGame._id}`, updatedGame);
       })
   })
 

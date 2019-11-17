@@ -1,6 +1,8 @@
 import {signIn, signUp} from './service/authentication';
 import {SIGN_IN, SIGN_UP, AUTH_MODAL_TOGGLE, GAME, LETTER_IN_PLAY} from './redux_types';
 import {getPlayerHand} from './selectors';
+import {joinGame} from './service/game';
+
 // AUTH
 
 export const onSignIn = (username, password) =>
@@ -51,14 +53,16 @@ export const onToggleSignUpModal = () => ({
 
 // GAME
 
-export const playerJoinedGame = game => {
+export const handleJoinGame = (gameId, playerId) => {
+  joinGame(gameId, playerId)
   return {
     type: GAME.PLAYER_JOINED,
-    payload: {game}
+    payload: gameId
   }
 }
 
 export const updateBoard = game => {
+  console.log(game)
   const newBoard = game.board.map(square => {
     if (square.letter === '') {
       return {...square, isValidPosition: true}
@@ -88,7 +92,7 @@ export const unselectLetter = () => ({
 
 export const handleSelectLetter = newIndex =>
   (dispatch, getState) => {
-    const {selectedLetter: {index}, game: {players}, playerInfo: {id}} = getState()
+    const {selectedLetter: {index}} = getState()
     const playerHand = getPlayerHand(getState())
     if (index === newIndex) {
       dispatch(unselectLetter())

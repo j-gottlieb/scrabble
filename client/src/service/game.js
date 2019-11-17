@@ -7,7 +7,7 @@ export const getNewGame = playerId => {
 }
 
 export const joinGame = (gameId, playerId) => {
-  const socket = socketIOClient('localhost:5000');
+  const socket = socketIOClient('http://localhost:5000');
   socket.emit('join-game', {gameId, playerId})
 }
 

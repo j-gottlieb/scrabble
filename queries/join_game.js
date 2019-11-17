@@ -7,12 +7,11 @@ const {getPlayerLetters} = require('../game_logic/turn_management');
  */
 const joinGame = async (gameId, playerId) => {
     const game = await Game.findOne({_id: gameId}).exec();
-    const includesCurrentPlayer = game.players.some((player) => playerId === player.playerId)
+    const includesCurrentPlayer = game.players.some((player) => playerId == player.playerId)
     if (includesCurrentPlayer) {
         return game  
     } else {
         const {newHand, newLetterPool} = getPlayerLetters([], game.letterPool)
-        console.log(playerId, newHand)
         game.players.push({
             playerId,
             isOwner: false

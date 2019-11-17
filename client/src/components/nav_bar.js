@@ -42,9 +42,13 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 NavBar.propTypes = {
   isUserLoggedIn: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired,
+  username: PropTypes.string,
   toggleSignIn: PropTypes.func.isRequired,
   toggleSignUp: PropTypes.func.isRequired
+}
+
+NavBar.defaultProps = {
+  username: ''
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar)

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Button} from 'reactstrap';
 import {connect} from 'react-redux';
-import {getIsPlayerTurn} from '../selectors';
+import {getIsPlayerTurn, getIsActiveGame} from '../selectors';
 import {submitMove, getNewGame} from '../service/game';
 
 const GameControls = props => (
@@ -21,7 +21,7 @@ const GameControls = props => (
 );
 
 const mapStateToProps = state => ({
-  isActiveGame: state.game.board.length > 0,
+  isActiveGame: getIsActiveGame(state),
   gameState: {
     game: state.game,
     playerId: state.playerInfo.id

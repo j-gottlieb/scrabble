@@ -11,19 +11,23 @@ import GameStats from './components/game_stats';
 import GameControls from './components/game_controls';
 import GameBoard from './components/game_board';
 import ActiveGames from './components/active_games';
-import {updateBoard, playerJoinedGame} from './actions';
+import {updateBoard} from './actions';
 
 class App extends Component {
 
   componentDidMount = () => {
 
     const socket = socketIOClient('localhost:5000');
+// TODO add player id to socket listener
+      socket.on(`new-game-${this.props.playerInfo.id}`, this.props.updateBoard)
 
-    socket.on('new-game', this.props.updateBoard)
+      socket.on('player-joined-game', game => {
+        console.log(game, 'anything')
+        this.props.updateBoard(game)
+      })
 
-    socket.on('game-update', this.props.updateBoard)
-
-    socket.on('player-joined-game', this.props.playerJoinedGame)
+    socket.on(`game-update-${this.props.activeGameId}`, this.props.updateBoard)
+// TODO add player id to socket listener
   }
 
   render() {
@@ -34,7 +38,9 @@ class App extends Component {
         {this.props.playerInfo.id &&
           <GameControls />
         }
-        <PlayerLetters />
+        {this.props.activeGameId &&
+          <PlayerLetters />
+        }
         <Container>
           <Row>
             <Col>
@@ -51,15 +57,15 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = ({showSignInModal, showSignUpModal, playerInfo}) => ({
-  showSignInModal,
-  showSignUpModal,
-  playerInfo
+const mapStateToProps = state => ({
+  showSignInModal: state.showSignInModal,
+  showSignUpModal: state.showSignUpModal,
+  playerInfo: state.playerInfo,
+  activeGameId: state.selectedGameId
 })
 
 const mapDispatchToProps = dispatch => ({
-  updateBoard: newGame => dispatch(updateBoard(newGame)),
-  playerJoinedGame: game => dispatch(playerJoinedGame(game))
+  updateBoard: newGame => dispatch(updateBoard(newGame))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
