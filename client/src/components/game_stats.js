@@ -9,18 +9,20 @@ const getTotalScore = playerWords =>
 
 const GameStats = ({players}) => (
   <>
-    {Object.keys(players).map(player => (
-      <Card>
+    {Object.keys(players).map((player, index) => (
+      <Card key={index}>
         <CardTitle>{`${player}: ${getTotalScore(players[player])}`}</CardTitle>
         <CardBody>
           <Table>
             <thead>
-              <th>word</th>
-              <th>score</th>
+              <tr>
+                <th>word</th>
+                <th>score</th>
+              </tr>
             </thead>
             <tbody>
-              {players[player].map(({word, score}) => (
-                <tr>
+              {players[player].map(({word, score}, index) => (
+                <tr key={index}>
                   <td>{word}</td>
                   <td>{score}</td>
                 </tr>

@@ -48,7 +48,7 @@ class ActiveGames extends Component {
               this.props.myGames.map(game => (
                 <DropdownItem
                   key={game._id}
-                  onClick={() => handleJoinGame(game._id, this.props.playerId)}
+                  onClick={() => this.props.handleJoinGame(game._id, this.props.playerId)}
                 >
                   {game._id}
                 </DropdownItem>
@@ -66,7 +66,7 @@ class ActiveGames extends Component {
                 this.props.gamesToJoin.map(game => (
                 <DropdownItem
                   key={game._id}
-                  onClick={() => handleJoinGame(game._id, this.props.playerId)}
+                  onClick={() => this.props.handleJoinGame(game._id, this.props.playerId)}
                 >
                   {game._id}
                 </DropdownItem>

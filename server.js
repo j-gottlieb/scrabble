@@ -8,7 +8,7 @@ const http = require('http')
 
 const app = express();
 const server = http.createServer(app)
-const io = socketIO(server)
+const io = socketIO(server, {forceNew: false})
 
 const Game = require('./models/Game');
 
@@ -52,25 +52,27 @@ io.on('connection', client => {
   client.on('new-game', ({playerId}) => {
     saveNewGame(playerId)
       .then(game => {
-        io.sockets.emit(`new-game-${playerId}`, game);
+        client.join(game._id, () => {
+          io.sockets.in(game._id).emit(`game-update`, game);
+        })
       })
   })
 
   // JOIN GAME
   client.on('join-game', ({gameId, playerId}) => {
-    client.join('new-room');
-    client.to('new-room').emit('player-joined-game', `${playerId} joined the room!`);
 
-    io.in('new-room').emit('player-joined-game', `${playerId} joined the room!`);
-    io.sockets.in('new-room').emit('player-joined-game', `${playerId} joined the room!`);
-    // client.emit('player-joined-game', `${playerId} joined the room!`)
+    client.join(gameId, async () => {
+      const game = await joinGame(gameId, playerId)
+      console.log(gameId)
+      io.sockets.in(gameId).emit('game-update', game);
+    });
   })
 
   // SUBMIT MOVE
   client.on('submit-move', ({game, playerId}) => {
     submitMove(game, playerId)
       .then(updatedGame => {
-        io.sockets.emit(`game-update-${updatedGame._id}`, updatedGame);
+        io.sockets.in(updatedGame._id).emit('game-update', updatedGame);
       })
   })
 

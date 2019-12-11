@@ -14,7 +14,6 @@ router.get('/', auth, (req, res) => {
 // @route POST api/games
 router.post('/', auth, ({body: {board, letterPool}}, res) => {
   const newGame = new Game({board, letterPool})
-  console.log(newGame)
   newGame.save()
     .then((games, err) => res.json(games))
     .catch(err => console.log(err))
@@ -24,7 +23,6 @@ router.post('/', auth, ({body: {board, letterPool}}, res) => {
 router.delete('/:id', (req, res) => {
   Game.findById(req.params.id)
     .then(game => {
-      console.log(game._id)
       game.remove()
       .then(() => res.json('Game was deleted'))
     })

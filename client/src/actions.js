@@ -62,7 +62,6 @@ export const handleJoinGame = (gameId, playerId) => {
 }
 
 export const updateBoard = game => {
-  console.log(game)
   const newBoard = game.board.map(square => {
     if (square.letter === '') {
       return {...square, isValidPosition: true}
@@ -132,7 +131,7 @@ export const handleInputLetter = (e, index) =>
       const {hands} = game;
       const indexOfPlayer = hands.findIndex(({playerId}) => playerId === id);
       hands[indexOfPlayer].letters = newPlayerHand;
- 
+
       const newGame = {
         ...game,
         board: [

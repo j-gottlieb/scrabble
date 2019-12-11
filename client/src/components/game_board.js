@@ -10,6 +10,7 @@ const GameBoard = props => (
       <div className="board">
           {props.board.map(({letter}, index) => (
             <BoardSquare
+              key={index}
               letter={letter}
               index={index}
             />

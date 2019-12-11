@@ -1,3 +1,5 @@
+import socketIOClient from "socket.io-client";
+
 export const LETTER_QUANTITIES = {
   'a': 9,
   'b': 2,
@@ -137,3 +139,7 @@ export const STARTING_LETTERS = () => {
 }
 
 export const STARTING_LETTERS_QUANTITY = 7;
+
+export const socket = socketIOClient('http://localhost:5000');
+
+export const GAME_UPDATE_EVENT = 'game-update';

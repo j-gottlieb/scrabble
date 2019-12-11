@@ -11,7 +11,7 @@ const PlayerLetters = ({onSelectLetter, playerHand, selectedLetterIndex}) => (
     {playerHand != null &&
       <ButtonToolbar>
         {playerHand.map((letter, index) => (
-          <ButtonGroup>
+          <ButtonGroup key={index}>
             <Button
               active={index === selectedLetterIndex}
               onClick={() => onSelectLetter(index)}
@@ -36,8 +36,13 @@ const mapDispatchToProps = dispatch => ({
 
 PlayerLetters.propTypes = {
   onSelectLetter: PropTypes.func.isRequired,
-  playerHand: PropTypes.arrayOf(PropTypes.string).isRequired,
-  selectedLetterIndex: PropTypes.number.isRequired
+  playerHand: PropTypes.arrayOf(PropTypes.string),
+  selectedLetterIndex: PropTypes.number
+}
+
+PlayerLetters.defaultProps = {
+  playerHand: null,
+  selectedLetterIndex: null
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerLetters)
