@@ -60,7 +60,7 @@ export const getPlayerHand = createSelector(
   getCurrentGame,
   (playerId, game) => {
     if (game._id != null) {
-      const currentPlayer = game.hands.find(hand => hand.playerId == playerId)
+      const currentPlayer = game.hands.find(hand => hand.playerId === playerId)
 
       return currentPlayer.letters
     } else {

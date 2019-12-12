@@ -4,7 +4,7 @@ const {getPlayerLetters} = require('../game_logic/turn_management');
 const {getNewWords} = require('../game_logic/board_parsing');
 
 const getNewLettersAndWords = async (currentGame, playerId) => {
-    const {board, letterPool} = currentGame; 
+    const {board, letterPool} = currentGame;
     // get previously played words
     const oldWords = currentGame.words.length > 0 ? currentGame.words.map(({word}) => word) : [];
     // find newly placed words
@@ -21,7 +21,7 @@ const getNewLettersAndWords = async (currentGame, playerId) => {
 
 const findWordScores = async (newWords, playerId) => {
     const wordFrequencies = await WordFrequency.find({word: {$in: newWords}}).exec();
-    return wordFrequencies.map(({word, frequency}) => ({word, score: frequency, playerId}))
+    return wordFrequencies.map(({word, score}) => ({word, score, playerId}))
 }
 
 const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playerId) => {
@@ -43,6 +43,7 @@ const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playe
 const submitMove = async (game, playerId) => {
     const {newLetterPool, newWords, newHand} = await getNewLettersAndWords(game, playerId)
     const playerWords = await findWordScores(newWords, playerId)
+    console.log(playerWords)
     const updatedGame = await updateGame(game._id, game.board, newLetterPool, playerWords, newHand, playerId)
     return updatedGame
 }
