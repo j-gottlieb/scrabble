@@ -10,6 +10,20 @@ import {
 } from '../selectors'
 import {handleJoinGame} from '../actions';
 import {GAME_SHAPE} from '../prop_shapes';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+
+const useStyles = makeStyles(theme => ({
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
+}));
 
 class ActiveGames extends Component {
   state={
@@ -36,7 +50,19 @@ class ActiveGames extends Component {
       <div>
         {this.props.playerId && (
           <div>
-          <p>Click a game to join</p>
+            <InputLabel id="demo-simple-select-label">Age</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                onChange={gameId => this.props.handleJoinGame(gameId, this.props.playerId)}
+              >
+              {this.props.gamesToJoin.length === 0 ? (
+                <MenuItem>No Games Found</MenuItem>
+                ) : (
+                this.props.gamesToJoin.map(game => (
+                  <MenuItem value={game._id}>{game._id}</MenuItem>
+                )))}
+              </Select>
           <Dropdown isOpen={this.state.isMyGamesOpen} toggle={this.toggleMyGames}>
             <DropdownToggle caret>
               My Games
@@ -97,4 +123,4 @@ ActiveGames.propTypes = {
   playerId: PropTypes.string
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActiveGames)
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(useStyles)(ActiveGames))
