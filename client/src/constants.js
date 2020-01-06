@@ -140,7 +140,20 @@ export const STARTING_LETTERS = () => {
 
 export const STARTING_LETTERS_QUANTITY = 7;
 
-export const socket = socketIOClient('http://localhost:5000');
+let apiUrl
+const apiUrls = {
+  production: 'https://flexicon-game.herokuapp.com/',
+  development: 'http://localhost:5000/'
+}
+
+if (window.location.hostname === 'localhost') {
+  apiUrl = apiUrls.development
+} else {
+  apiUrl = apiUrls.production
+}
+export const url = apiUrl;
+
+export const socket = socketIOClient(apiUrl);
 
 export const GAME_UPDATE_EVENT = 'game-update';
 export const GAME_JOIN_EVENT = 'join-game';

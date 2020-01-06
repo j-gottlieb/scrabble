@@ -1,6 +1,7 @@
 import wretch from 'wretch';
+import {url} from '../constants';
 
-const authURL = 'http://localhost:5000/api/';
+const authURL = `${url}api/`;
 
 export const signUp = (username, password) =>
   wretch(`${authURL}users`)
