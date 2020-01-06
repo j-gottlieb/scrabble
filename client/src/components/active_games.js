@@ -8,10 +8,14 @@ import {
 import {handleJoinGame} from '../actions';
 import { makeStyles } from '@material-ui/core/styles';
 import {
+  Button,
+  Grid,
+  TextField,
   MenuItem,
   InputLabel,
   Select
 } from '@material-ui/core';
+import {getNewGame} from '../service/game';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -30,6 +34,7 @@ const useStyles = makeStyles(theme => ({
 const ActiveGames = props => {
   const [isMyGamesOpen, setIsMyGamesOpen] = useState(false);
   const [isOtherGamesOpen, setIsOtherGamesOpen] = useState(false);
+  const [gameName, setGameName] = useState('');
 
   const dispatch = useDispatch();
 
@@ -78,7 +83,7 @@ const ActiveGames = props => {
             key={game._id}
             value={game._id}
           >
-            {game._id}
+            {game.name}
           </MenuItem>
           ))
         )}
@@ -103,11 +108,30 @@ const ActiveGames = props => {
             key={game._id}
             value={game._id}
           >
-            {game._id}
+            {game.name}
           </MenuItem>
           ))
         )}
       </Select>
+      <Grid>
+          <TextField
+            onChange={e => setGameName(e.target.value)}
+            id="new-game-text-input"
+            label="New Game"
+            variant="filled"
+            placeholder="choose a name"
+          />
+          </Grid>
+          <Grid>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={() => getNewGame(playerId, gameName)}
+            >
+              Create Game
+            </Button>
+          </Grid>
     </>
   )
 }

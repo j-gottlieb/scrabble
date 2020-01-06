@@ -49,8 +49,8 @@ app.use('/api/auth', require('./routes/api/auth'));
 
 io.on('connection', client => {
   // CREATE GAME
-  client.on('new-game', ({playerId}) => {
-    saveNewGame(playerId)
+  client.on('new-game', ({playerId, name}) => {
+    saveNewGame(playerId, name)
       .then(session => {
         client.join(session.game._id, () => {
           io.sockets.in(session.game._id).emit(`join-game`, session);

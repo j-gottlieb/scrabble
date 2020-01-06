@@ -31,6 +31,9 @@ const GameSchema = new Schema({
   turnNumber: {
     type: Number,
     default: 0
+  },
+  name: {
+    type: String
   }
 });
 

@@ -4,7 +4,7 @@ const {getPlayerLetters} = require('../game_logic/turn_management');
 const Game = require('../models/Game');
 const User = require('../models/User');
 
-const saveNewGame = async playerId => {
+const saveNewGame = async (playerId, name) => {
   const {board, letterPool} = getNewGame();
   const {newHand, newLetterPool} = getPlayerLetters([], letterPool)
   const newGame = new Game({
@@ -16,7 +16,8 @@ const saveNewGame = async playerId => {
     }],
     letterPool: newLetterPool,
     words: [],
-    players: [{playerId, isOwner: true, isCurrentTurn: true}]
+    players: [{playerId, isOwner: true, isCurrentTurn: true}],
+    name
   });
     newGame.save();
     const player = await User.find({_id: playerId}, '_id username').exec();

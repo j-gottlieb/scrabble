@@ -42,7 +42,6 @@ const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playe
 
 const submitMove = async (game, playerId) => {
     const {newLetterPool, newWords, newHand} = getNewLettersAndWords(game, playerId)
-    console.log(newLetterPool)
     const playerWords = await findWordScores(newWords, playerId)
     const updatedGame = await updateGame(game._id, game.board, newLetterPool, playerWords, newHand, playerId)
     return updatedGame

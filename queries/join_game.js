@@ -24,7 +24,6 @@ const joinGame = async (gameId, playerId) => {
     }
     const playerIds = game.players.map(({playerId}) => playerId);
     const players = await User.find({_id: { $in: playerIds}}, '_id username').exec();
-    console.log(players)
     // TODO select only the fields i need!
     return {game, players}
 }

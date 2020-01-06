@@ -1,8 +1,8 @@
 import {socket} from '../constants'
 import wretch from 'wretch';
 
-export const getNewGame = playerId => {
-  socket.emit('new-game', {playerId})
+export const getNewGame = (playerId, name) => {
+  socket.emit('new-game', {playerId, name})
 }
 
 export const joinGame = (gameId, playerId) => {

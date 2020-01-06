@@ -6,6 +6,7 @@ import {connect} from 'react-redux'
 
 const GameBoard = props => (
   <>
+    {props.gameName}
     {props.board.length > 0 && (
       <div className="board">
           {props.board.map(({letter}, index) => (
@@ -21,6 +22,7 @@ const GameBoard = props => (
 )
 
 const mapStateToProps = state => ({
+  gameName: state.game.name,
   board: getBoard(state)
 })
 
