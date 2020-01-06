@@ -8,10 +8,10 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableRow,
   TableHead,
 } from '@material-ui/core';
+import TableContainer from '@material-ui/core/TableContainer';
 
 const getTotalScore = playerWords =>
   playerWords.reduce((sum, {score}) => sum += score, 0)
