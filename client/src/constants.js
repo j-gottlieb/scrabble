@@ -143,3 +143,4 @@ export const STARTING_LETTERS_QUANTITY = 7;
 export const socket = socketIOClient('http://localhost:5000');
 
 export const GAME_UPDATE_EVENT = 'game-update';
+export const GAME_JOIN_EVENT = 'join-game';

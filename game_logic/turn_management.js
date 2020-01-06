@@ -109,7 +109,7 @@ const getPlayerLetters = (playerLetters, letterPool) => {
     const randomLetterIndex = getRandomIndex(letterPool.length)
     lettersToAddToHand.push(...letterPool.splice(randomLetterIndex, 1))
   }
-
+  
   return {
     newLetterPool: letterPool,
     newHand: [...playerLetters, ...lettersToAddToHand]

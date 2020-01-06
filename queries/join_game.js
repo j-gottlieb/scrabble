@@ -1,4 +1,5 @@
 const Game = require('../models/Game');
+const User = require('../models/User');
 const {getPlayerLetters} = require('../game_logic/turn_management');
 
 /**
@@ -8,9 +9,7 @@ const {getPlayerLetters} = require('../game_logic/turn_management');
 const joinGame = async (gameId, playerId) => {
     const game = await Game.findOne({_id: gameId}).exec();
     const includesCurrentPlayer = game.players.some((player) => playerId == player.playerId)
-    if (includesCurrentPlayer) {
-        return game
-    } else {
+    if (!includesCurrentPlayer) {
         const {newHand, newLetterPool} = getPlayerLetters([], game.letterPool)
         game.players.push({
             playerId,
@@ -22,8 +21,12 @@ const joinGame = async (gameId, playerId) => {
         })
         game.letterPool = newLetterPool
         game.save()
-        return game
     }
+    const playerIds = game.players.map(({playerId}) => playerId);
+    const players = await User.find({_id: { $in: playerIds}}, '_id username').exec();
+    console.log(players)
+    // TODO select only the fields i need!
+    return {game, players}
 }
 
 module.exports = joinGame

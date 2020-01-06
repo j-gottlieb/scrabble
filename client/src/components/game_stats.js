@@ -1,39 +1,70 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Table, Card, CardTitle, CardBody} from 'reactstrap';
-import {connect} from 'react-redux';
+import {connect, useSelector} from 'react-redux';
 import {getPlayerWords} from '../selectors';
+import { makeStyles } from '@material-ui/core/styles';
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  TableHead,
+} from '@material-ui/core';
 
 const getTotalScore = playerWords =>
   playerWords.reduce((sum, {score}) => sum += score, 0)
 
-const GameStats = ({players}) => (
-  <>
-    {Object.keys(players).map((player, index) => (
-      <Card key={index}>
-        <CardTitle>{`${player}: ${getTotalScore(players[player])}`}</CardTitle>
-        <CardBody>
-          <Table>
-            <thead>
-              <tr>
-                <th>word</th>
-                <th>score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players[player].map(({word, score}, index) => (
-                <tr key={index}>
-                  <td>{word}</td>
-                  <td>{score}</td>
-                </tr>
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: 'fit-content',
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.secondary,
+    '& svg': {
+      margin: theme.spacing(2),
+    },
+    '& hr': {
+      margin: theme.spacing(0, 0.5),
+    },
+  },
+  table: {}
+}));
+
+const GameStats = ({players}) => {
+  const classes = useStyles();
+
+  const currentPlayers = useSelector(state => state.currentPlayers);
+
+  const getPlayerName = playerId => currentPlayers.find(
+      player => player._id === playerId
+    ).username
+
+  return (
+    <>
+      <TableContainer component={Paper}>
+        <Table className={classes.table} size="small" aria-label="a dense table">
+          <TableHead>
+            <TableRow>
+              {Object.keys(players).map(playerId => (
+                <TableCell key={playerId}>{getPlayerName(playerId)}</TableCell>
               ))}
-            </tbody>
-          </Table>
-        </CardBody>
-      </Card>
-    ))}
-  </>
-);
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              {Object.keys(players).map((player, index) => (
+                  <TableCell key={player}>{getTotalScore(players[player])}</TableCell>
+              ))}
+          </TableRow>
+        </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  )
+}
 
 const mapStateToProps = state => ({
   players: getPlayerWords(state)

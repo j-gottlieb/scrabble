@@ -1,62 +1,73 @@
-import React, {Component} from 'react';
+import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import {connect} from 'react-redux'
-import PlayerLetters from './components/player_letters';
-import AuthModal from'./components/auth_modal';
-import {Container, Row, Col} from 'reactstrap';
+import {useDispatch, useSelector} from 'react-redux'
+import {
+  Container,
+  Grid,
+  Toolbar
+} from '@material-ui/core';
 import NavBar from './components/nav_bar'
 import GameStats from './components/game_stats';
 import GameControls from './components/game_controls';
 import GameBoard from './components/game_board';
-import ActiveGames from './components/active_games';
-import {updateBoard} from './actions';
-import {socket, GAME_UPDATE_EVENT} from './constants'
+import Portal from './components/portal';
+import {updateBoard, gameWasJoined} from './actions';
+import {socket, GAME_UPDATE_EVENT, GAME_JOIN_EVENT} from './constants'
 
-class App extends Component {
+const App = () => {
 
-  componentDidMount = () => {
-      socket.on(GAME_UPDATE_EVENT, game => {
-        this.props.updateBoard(game)
-      })
-  }
+  const dispatch = useDispatch();
 
-  render() {
-    return (
-      <>
-      <NavBar />
-      <ActiveGames />
-        {this.props.playerInfo.id &&
-          <GameControls />
-        }
-        {this.props.activeGameId &&
-          <PlayerLetters />
-        }
-        <Container>
-          <Row>
-            <Col>
-              <GameBoard />
-            </Col>
-            <Col>
-              <GameStats />
-            </Col>
-          </Row>
+  const onUpdateBoard = game => dispatch(updateBoard(game))
+  const onGameWasJoined = game => dispatch(gameWasJoined(game))
+
+  const {
+    activeGameId
+  } = useSelector(state => ({
+    activeGameId: state.game._id
+  }))
+
+  useEffect(() => {
+    socket.on(GAME_UPDATE_EVENT, game => {
+      onUpdateBoard(game)
+    })
+    socket.on(GAME_JOIN_EVENT, game => {
+      onGameWasJoined(game)
+    })
+  }, [activeGameId])
+
+  return (
+    <div>
+      <Container>
+          <NavBar />
+          <Grid
+            container
+            spacing={3}
+            direction="column"
+            alignItems="center"
+            justify="center"
+          >
+            <Toolbar />
+            {activeGameId ? (
+              <>
+                <Grid>
+                  <GameStats />
+                </Grid>
+                <Grid>
+                  <GameBoard />
+                </Grid>
+                <Grid>
+                  <GameControls />
+                </Grid>
+              </>
+            ) : (
+              <Portal />
+            )}
+          </Grid>
         </Container>
-        <AuthModal />
-      </>
-    );
-  }
+    </div>
+  );
 }
 
-const mapStateToProps = state => ({
-  showSignInModal: state.showSignInModal,
-  showSignUpModal: state.showSignUpModal,
-  playerInfo: state.playerInfo,
-  activeGameId: state.selectedGameId
-})
-
-const mapDispatchToProps = dispatch => ({
-  updateBoard: newGame => dispatch(updateBoard(newGame))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default App;

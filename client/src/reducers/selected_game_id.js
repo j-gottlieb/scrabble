@@ -2,7 +2,7 @@ import {GAME} from '../redux_types';
 
 const selectedGameId = (state = '', action) => {
     switch (action.type) {
-        case GAME.PLAYER_JOINED:
+        case GAME.JOIN_GAME:
           return action.payload
         default:
           return state

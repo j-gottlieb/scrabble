@@ -1,5 +1,12 @@
 import {signIn, signUp} from './service/authentication';
-import {SIGN_IN, SIGN_UP, AUTH_MODAL_TOGGLE, GAME, LETTER_IN_PLAY} from './redux_types';
+import {
+  SIGN_IN,
+  SIGN_UP,
+  AUTH_MODAL_TOGGLE,
+  GAMES_MODAL_TOGGLE,
+  GAME,
+  LETTER_IN_PLAY
+} from './redux_types';
 import {getPlayerHand} from './selectors';
 import {joinGame} from './service/game';
 
@@ -53,22 +60,47 @@ export const onToggleSignUpModal = () => ({
 
 // GAME
 
+export const showGamesModal = () => ({
+  type: GAMES_MODAL_TOGGLE.SHOW
+})
+
+export const hideGamesModal = () => ({
+  type: GAMES_MODAL_TOGGLE.HIDE
+})
+
 export const handleJoinGame = (gameId, playerId) => {
   joinGame(gameId, playerId)
   return {
-    type: GAME.PLAYER_JOINED,
+    type: GAME.JOIN_GAME,
     payload: gameId
   }
 }
 
-export const updateBoard = game => {
-  const newBoard = game.board.map(square => {
+const parseBoard = board =>
+  board.map(square => {
     if (square.letter === '') {
       return {...square, isValidPosition: true}
     } else {
       return {...square, isValidPosition: false}
     }
   })
+
+export const gameWasJoined = ({game, players}) => {
+  const newBoard = parseBoard(game.board);
+  return {
+    type: GAME.PLAYER_JOINED,
+    payload: {
+      game: {
+        ...game,
+        board: newBoard
+      },
+      players
+    }
+  }
+}
+
+export const updateBoard = game => {
+  const newBoard = parseBoard(game.board)
   return {
     type: GAME.UPDATE_BOARD,
     payload: {

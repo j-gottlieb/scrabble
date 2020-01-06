@@ -51,9 +51,9 @@ io.on('connection', client => {
   // CREATE GAME
   client.on('new-game', ({playerId}) => {
     saveNewGame(playerId)
-      .then(game => {
-        client.join(game._id, () => {
-          io.sockets.in(game._id).emit(`game-update`, game);
+      .then(session => {
+        client.join(session.game._id, () => {
+          io.sockets.in(session.game._id).emit(`join-game`, session);
         })
       })
   })
@@ -62,18 +62,15 @@ io.on('connection', client => {
   client.on('join-game', ({gameId, playerId}) => {
 
     client.join(gameId, async () => {
-      const game = await joinGame(gameId, playerId)
-      console.log(gameId)
-      io.sockets.in(gameId).emit('game-update', game);
+      const session = await joinGame(gameId, playerId)
+      io.sockets.in(gameId).emit('join-game', session);
     });
   })
 
   // SUBMIT MOVE
-  client.on('submit-move', ({game, playerId}) => {
-    submitMove(game, playerId)
-      .then(updatedGame => {
-        io.sockets.in(updatedGame._id).emit('game-update', updatedGame);
-      })
+  client.on('submit-move', async ({game, playerId}) => {
+    const updatedGame = await submitMove(game, playerId)
+    io.sockets.in(updatedGame._id).emit('game-update', updatedGame);
   })
 
   client.on('disconnect', () => {

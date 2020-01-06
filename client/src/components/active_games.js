@@ -1,126 +1,115 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   getGamesToJoin,
   getMyGames,
-  getIsActiveGame,
   getPlayerId
 } from '../selectors'
 import {handleJoinGame} from '../actions';
-import {GAME_SHAPE} from '../prop_shapes';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import { makeStyles } from '@material-ui/core/styles';
+import {
+  MenuItem,
+  InputLabel,
+  Select
+} from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
+  paper: {
+    position: 'absolute',
+    width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
   },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
+  select: {
+    width: 200
+  }
 }));
 
-class ActiveGames extends Component {
-  state={
-    isMyGamesOpen: false,
-    isOtherGamesOpen: false
+const ActiveGames = props => {
+  const [isMyGamesOpen, setIsMyGamesOpen] = useState(false);
+  const [isOtherGamesOpen, setIsOtherGamesOpen] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const classes = useStyles();
+
+  const {
+    gamesToJoin,
+    myGames,
+    playerId
+  } = useSelector(state => ({
+    gamesToJoin: getGamesToJoin(state),
+    myGames: getMyGames(state),
+    playerId: getPlayerId(state)
+  }))
+
+  const toggleOtherGames = () => {
+    setIsOtherGamesOpen(!isOtherGamesOpen)
+    setIsMyGamesOpen(false)
   }
 
-  toggleOtherGames = () => {
-    this.setState(prevState => ({
-      isMyGamesOpen: false,
-      isOtherGamesOpen: !prevState.isOtherGamesOpen
-    }))
+  const toggleMyGames = () => {
+    setIsMyGamesOpen(!isMyGamesOpen)
+    setIsOtherGamesOpen(false)
   }
 
-  toggleMyGames = () => {
-    this.setState(prevState => ({
-      isOtherGamesOpen: false,
-      isMyGamesOpen: !prevState.isMyGamesOpen
-    }))
-  }
+  const onSelectGame = ({target: {value}}) => dispatch(handleJoinGame(value, playerId))
 
-  render(){
-    return (
-      <div>
-        {this.props.playerId && (
-          <div>
-            <InputLabel id="demo-simple-select-label">Age</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                onChange={gameId => this.props.handleJoinGame(gameId, this.props.playerId)}
-              >
-              {this.props.gamesToJoin.length === 0 ? (
-                <MenuItem>No Games Found</MenuItem>
-                ) : (
-                this.props.gamesToJoin.map(game => (
-                  <MenuItem value={game._id}>{game._id}</MenuItem>
-                )))}
-              </Select>
-          <Dropdown isOpen={this.state.isMyGamesOpen} toggle={this.toggleMyGames}>
-            <DropdownToggle caret>
-              My Games
-              </DropdownToggle>
-            <DropdownMenu>
-            {this.props.myGames.length === 0 ? (
-                <DropdownItem>No Games Found</DropdownItem>
-                ) : (
-              this.props.myGames.map(game => (
-                <DropdownItem
-                  key={game._id}
-                  onClick={() => this.props.handleJoinGame(game._id, this.props.playerId)}
-                >
-                  {game._id}
-                </DropdownItem>
-              )))}
-            </DropdownMenu>
-          </Dropdown>
-          <Dropdown isOpen={this.state.isOtherGamesOpen} toggle={this.toggleOtherGames}>
-            <DropdownToggle caret>
-              Other Games to Join
-              </DropdownToggle>
-            <DropdownMenu>
-              {this.props.gamesToJoin.length === 0 ? (
-                <DropdownItem>No Games Found</DropdownItem>
-                ) : (
-                this.props.gamesToJoin.map(game => (
-                <DropdownItem
-                  key={game._id}
-                  onClick={() => this.props.handleJoinGame(game._id, this.props.playerId)}
-                >
-                  {game._id}
-                </DropdownItem>
-              )))}
-            </DropdownMenu>
-          </Dropdown>
-          </div>
+  return (
+    <>
+      <InputLabel id="my-games-select-label">My Games</InputLabel>
+      <Select
+        labelId="my-games-select-label"
+        id="my-games-select"
+        className={classes.select}
+        open={isMyGamesOpen}
+        onClose={toggleMyGames}
+        onOpen={toggleMyGames}
+        value={null}
+        onChange={onSelectGame}
+      >
+        {myGames.length === 0 ? (
+          <MenuItem value={null}>No Games Found</MenuItem>
+          ) : (
+          myGames.map(game => (
+          <MenuItem
+            key={game._id}
+            value={game._id}
+          >
+            {game._id}
+          </MenuItem>
+          ))
         )}
-      </div>
-    )
-  }
+      </Select>
+
+      <InputLabel id="other-games-select-label">Other Games</InputLabel>
+      <Select
+        labelId="other-games-select-label"
+        id="my-games-select"
+        className={classes.select}
+        open={isOtherGamesOpen}
+        onClose={toggleOtherGames}
+        onOpen={toggleOtherGames}
+        value={null}
+        onChange={onSelectGame}
+      >
+        {gamesToJoin.length === 0 ? (
+          <MenuItem value={null}>No Games Found</MenuItem>
+          ) : (
+          gamesToJoin.map(game => (
+          <MenuItem
+            key={game._id}
+            value={game._id}
+          >
+            {game._id}
+          </MenuItem>
+          ))
+        )}
+      </Select>
+    </>
+  )
 }
 
-const mapStateToProps = state => ({
-  isActiveGame: getIsActiveGame(state),
-  gamesToJoin: getGamesToJoin(state),
-  myGames: getMyGames(state),
-  playerId: getPlayerId(state)
-})
-
-const mapDispatchToProps = dispatch => ({
-  handleJoinGame: (gameId, playerId) => dispatch(handleJoinGame(gameId, playerId))
-})
-
-ActiveGames.propTypes = {
-  gamesToJoin: GAME_SHAPE,
-  myGames: GAME_SHAPE,
-  playerId: PropTypes.string
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(useStyles)(ActiveGames))
+export default ActiveGames
