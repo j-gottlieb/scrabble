@@ -38,25 +38,21 @@ const GameStats = ({players}) => {
 
   const currentPlayers = useSelector(state => state.currentPlayers);
 
-  const getPlayerName = playerId => currentPlayers.find(
-      player => player._id === playerId
-    ).username
-
   return (
     <>
       <TableContainer component={Paper}>
         <Table className={classes.table} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              {Object.keys(players).map(playerId => (
-                <TableCell key={playerId}>{getPlayerName(playerId)}</TableCell>
+              {currentPlayers.map(({username}, index) => (
+                <TableCell key={index}>{username}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               {Object.keys(players).map((player, index) => (
-                  <TableCell key={player}>{getTotalScore(players[player])}</TableCell>
+                  <TableCell key={index}>{getTotalScore(players[player])}</TableCell>
               ))}
           </TableRow>
         </TableBody>

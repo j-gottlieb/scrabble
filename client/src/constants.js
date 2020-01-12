@@ -157,3 +157,10 @@ export const socket = socketIOClient(apiUrl);
 
 export const GAME_UPDATE_EVENT = 'game-update';
 export const GAME_JOIN_EVENT = 'join-game';
+export const GAME_BEGIN_EVENT = 'begin-game';
+
+export const PORTAL_VIEW = {
+  AUTH: 'PORTAL_VIEW_AUTH',
+  GAME_SELECT: 'PORTAL_VIEW_GAME_SELECT',
+  ACTIVE_GAME: 'PORTAL_VIEW_ACTIVE_GAME'
+}

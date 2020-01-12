@@ -106,7 +106,10 @@ const getPlayerLetters = (playerLetters, letterPool) => {
   const lettersToAddToHand = []
 
   while (lettersToAddToHand.length < numberOfLettersToDraw) {
-    const randomLetterIndex = getRandomIndex(letterPool.length)
+    const poolLength = letterPool.length;
+    if (poolLength === 0) break;
+    
+    const randomLetterIndex = getRandomIndex(poolLength)
     lettersToAddToHand.push(...letterPool.splice(randomLetterIndex, 1))
   }
   

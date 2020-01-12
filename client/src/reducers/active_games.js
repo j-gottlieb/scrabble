@@ -1,4 +1,4 @@
-import {SIGN_IN} from '../redux_types'
+import {SIGN_IN, SIGN_UP} from '../redux_types'
 
 const activeGames = (
   state = [],
@@ -6,6 +6,7 @@ const activeGames = (
 ) => {
   switch (action.type) {
     case SIGN_IN.SUCCESS:
+    case SIGN_UP.SUCCESS:
       return action.payload.activeGames
     default:
       return state

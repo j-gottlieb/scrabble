@@ -35,14 +35,15 @@ router.post('/', (req, res) => {
               if (err) throw err;
 
               //get active games
-              Game.find({isActive: true}, (err, activeGames) => {
+              Game.find({}, (err, activeGames) => {
                 res.json({
                   token,
                   user: {
                     id: user.id,
                     username: user.username
                   },
-                  activeGames
+                  activeGames,
+                  message: `Welcome, ${user.username}`
                 })
               })
             }

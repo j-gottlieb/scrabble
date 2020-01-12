@@ -22,11 +22,12 @@ const GameSchema = new Schema({
   }],
   players: [{
     playerId: mongoose.Schema.Types.ObjectId,
-    isOwner: Boolean
+    isOwner: Boolean,
+    username: String
   }],
-  isActive: {
+  hasBegun: {
     type: Boolean,
-    default: true
+    default: false
   },
   turnNumber: {
     type: Number,

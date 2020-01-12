@@ -5,9 +5,11 @@ import {
   AUTH_MODAL_TOGGLE,
   GAMES_MODAL_TOGGLE,
   GAME,
-  LETTER_IN_PLAY
+  LETTER_IN_PLAY,
+  CHANGE_VIEW
 } from './redux_types';
-import {getPlayerHand} from './selectors';
+import {PORTAL_VIEW} from './constants';
+import {getPlayerHand, getCurrentGame, getPlayerId} from './selectors';
 import {joinGame} from './service/game';
 
 // AUTH
@@ -15,19 +17,21 @@ import {joinGame} from './service/game';
 export const onSignIn = (username, password) =>
   dispatch => {
     signIn(username, password)
-      .then(({token, user: {id, username}, activeGames}) => {
-        dispatch(signInSuccess({token, id, username, activeGames}))
+      .then(({token, user: {id, username}, activeGames, message}) => {
+        dispatch(signInSuccess({token, id, username, activeGames, message}))
+        dispatch(changePortalView(PORTAL_VIEW.GAME_SELECT))
       })
-      .catch(({message}) => dispatch(signInFailure(message)))
+      .catch(({message}) => dispatch(signInFailure({message})))
   }
 
 export const onSignUp = (username, password) =>
   dispatch => {
     signUp(username, password)
-      .then(({token, user: {id, username}}) => {
-        dispatch(signUpSuccess({token, id, username}))
+      .then(({token, user: {id, username}, activeGames, message}) => {
+        dispatch(signUpSuccess({token, id, username, activeGames, message}))
+        dispatch(changePortalView(PORTAL_VIEW.GAME_SELECT))
       })
-      .catch(({message}) => dispatch(signUpFailure(message)))
+      .catch(({message}) => dispatch(signUpFailure({message})))
   }
 
 const signInSuccess = payload => ({
@@ -58,6 +62,13 @@ export const onToggleSignUpModal = () => ({
   type: AUTH_MODAL_TOGGLE.SIGN_UP,
 })
 
+// VIEW
+
+export const changePortalView = payload => ({
+  type: CHANGE_VIEW,
+  payload
+})
+
 // GAME
 
 export const showGamesModal = () => ({
@@ -68,12 +79,13 @@ export const hideGamesModal = () => ({
   type: GAMES_MODAL_TOGGLE.HIDE
 })
 
-export const handleJoinGame = (gameId, playerId) => {
+export const handleJoinGame = (gameId, playerId) => 
+  (dispatch) => {
   joinGame(gameId, playerId)
-  return {
+  dispatch({
     type: GAME.JOIN_GAME,
     payload: gameId
-  }
+  })
 }
 
 const parseBoard = board =>
@@ -85,9 +97,10 @@ const parseBoard = board =>
     }
   })
 
-export const gameWasJoined = ({game, players}) => {
+export const gameWasJoined = ({game, players}) => 
+(dispatch) => {
   const newBoard = parseBoard(game.board);
-  return {
+  dispatch({
     type: GAME.PLAYER_JOINED,
     payload: {
       game: {
@@ -96,18 +109,26 @@ export const gameWasJoined = ({game, players}) => {
       },
       players
     }
-  }
+  })
+  dispatch(changePortalView(PORTAL_VIEW.ACTIVE_GAME))
 }
 
-export const updateBoard = game => {
-  const newBoard = parseBoard(game.board)
+export const beginGame = game => ({
+  type: GAME.BEGIN_GAME,
+  payload: {game}
+})
+
+export const updateBoard = ({updatedGame, newWords}) => {
+  const newBoard = parseBoard(updatedGame.board)
+  const newWordsMessage = newWords.map(({word, score}) => `${word}: ${score}`).join(', ')
   return {
     type: GAME.UPDATE_BOARD,
     payload: {
       game: {
-        ...game,
+        ...updatedGame,
         board: newBoard
-      }
+      },
+      newWordsMessage
     }
   }
 }
@@ -138,40 +159,79 @@ export const playLetter = payload => ({
   payload
 })
 
-export const unplayLetter = () => ({
-  type: GAME.UNPLAY_LETTER
+export const unplayLetter = payload => ({
+  type: GAME.UNPLAY_LETTER,
+  payload
 })
 
 export const handleInputLetter = (e, index) =>
   (dispatch, getState) => {
-    const {selectedLetter: {letter, index: selectedLetterIndex}, game, playerInfo: {id}} = getState()
-
-    if (!game.board[index].isValidPosition ||
-      (letter == null && game.board[index].letter === '' && game.board[index].isValidPosition)
+    const {selectedLetter: {letter: selectedLetter, index: selectedLetterIndex}, game, playerInfo: {id}} = getState()
+    const {isValidPosition, letter: playedLetter} = game.board[index];
+    console.log(selectedLetter, playedLetter, selectedLetter === '', playedLetter === '')
+    // position is invalid
+    if (!isValidPosition ||
+      (selectedLetter === '' && playedLetter === '')
     ) {
       return;
     }
-    if (letter == null && game.board[index].letter !== '' && game.board[index].isValidPosition) {
-      dispatch(unplayLetter())
-    } else {
-      const newPlayerHand = [...getPlayerHand(getState())];
-      if (game.board[index].letter === '') {
-        newPlayerHand.splice(selectedLetterIndex, 1)
-      } else {
-        newPlayerHand.splice(selectedLetterIndex, 1, game.board[index].letter)
-      }
-      const {hands} = game;
-      const indexOfPlayer = hands.findIndex(({playerId}) => playerId === id);
-      hands[indexOfPlayer].letters = newPlayerHand;
 
-      const newGame = {
-        ...game,
-        board: [
-          ...game.board.slice(0, index),
-          {...game.board[index], letter},
-          ...game.board.slice(index + 1)
-        ],
-      }
+    const newPlayerHand = [...getPlayerHand(getState())];
+
+    // valid move
+    if (selectedLetter !== '' && playedLetter === '') {
+      newPlayerHand.splice(selectedLetterIndex, 1)
+      const newGame = updateGameObject(game, id, newPlayerHand, index, selectedLetter);
       dispatch(playLetter({game: newGame}))
     }
+
+    // withdraw letter
+    if (selectedLetter === '' && playedLetter !== '') {
+      newPlayerHand.push(playedLetter)
+      const newGame = updateGameObject(game, id, newPlayerHand, index, selectedLetter);
+      dispatch(unplayLetter({game: newGame}))
+    }
   }
+
+  const updateGameObject = (game, id, newPlayerHand, index, letter) => {
+    const {hands} = game;
+    const indexOfPlayer = hands.findIndex(({playerId}) => playerId === id);
+    hands[indexOfPlayer].letters = newPlayerHand;
+
+    return {
+      ...game,
+      board: [
+        ...game.board.slice(0, index),
+        {...game.board[index], letter},
+        ...game.board.slice(index + 1)
+      ],
+    }
+  }
+
+  const shuffleLetters = letters => {
+    for (let currentIndex = letters.length - 1; currentIndex > 0; currentIndex--) {
+      const randomIndex = Math.floor(Math.random() * (currentIndex + 1));
+      [letters[currentIndex], letters[randomIndex]] = [letters[randomIndex], letters[currentIndex]];
+    }
+    return letters;
+  }
+
+  export const handleShuffleLetters = () =>
+    (dispatch, getState) => {
+      const state = getState();
+      const playerHand = getPlayerHand(state);
+      const playerId = getPlayerId(state);
+      const currentGame = getCurrentGame(state);
+      const indexOfHand = currentGame.hands.findIndex(hand => playerId === hand.playerId)
+      const hands = currentGame.hands;
+      hands[indexOfHand].letters = shuffleLetters(playerHand);
+      const updatedGame = {
+        ...currentGame,
+        hands
+      }
+      dispatch({
+        type: GAME.SHUFFLE_HAND,
+        payload: {game: updatedGame}
+      })
+    }
+

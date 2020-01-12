@@ -75,6 +75,7 @@ const Auth = ({isLogin}) => {
             id={`password-text-input-${isLogin}`}
             label="Password"
             variant="filled"
+            type="password"
           />
           </Grid>
           <Grid>

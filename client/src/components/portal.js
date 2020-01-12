@@ -4,7 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import {Paper, Grid} from '@material-ui/core';
 import Auth from './auth';
 import ActiveGames from './active_games';
+import GameContainer from './game_container';
 import { getPlayerId } from '../selectors';
+import { PORTAL_VIEW } from '../constants';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,25 +26,31 @@ const Portal = () => {
     const classes = useStyles();
 
     const {
-      showGames
+      showGames,
+      portalView
     } = useSelector(state => ({
-      showGames: !getPlayerId(state)
+      showGames: !getPlayerId(state),
+      portalView: state.portalView
     }))
 
     return (
         <div className={classes.root}>
             <Paper variant="outlined" elevation={3}>
-              {showGames ? (
+              {portalView === PORTAL_VIEW.AUTH && (
                 <Grid container>
-                <Grid className={classes.auth} item>
-                  <Auth isLogin/>
+                  <Grid className={classes.auth} item>
+                    <Auth isLogin/>
+                  </Grid>
+                  <Grid className={classes.auth} item>
+                    <Auth />
+                  </Grid>
                 </Grid>
-                <Grid className={classes.auth} item>
-                  <Auth />
-                </Grid>
-              </Grid>
-              ) : (
+              )}
+              {portalView === PORTAL_VIEW.GAME_SELECT && (
                 <ActiveGames />
+              )}
+              {portalView === PORTAL_VIEW.ACTIVE_GAME && (
+                <GameContainer />
               )}
             </Paper>    
         </div>

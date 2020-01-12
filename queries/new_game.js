@@ -7,6 +7,8 @@ const User = require('../models/User');
 const saveNewGame = async (playerId, name) => {
   const {board, letterPool} = getNewGame();
   const {newHand, newLetterPool} = getPlayerLetters([], letterPool)
+  const player = await User.find({_id: playerId}, '_id username').exec();
+
   const newGame = new Game({
     _id: new mongoose.Types.ObjectId,
     board,
@@ -16,11 +18,14 @@ const saveNewGame = async (playerId, name) => {
     }],
     letterPool: newLetterPool,
     words: [],
-    players: [{playerId, isOwner: true, isCurrentTurn: true}],
+    players: [{
+      playerId, 
+      isOwner: true,
+      username: player[0].username
+    }],
     name
   });
     newGame.save();
-    const player = await User.find({_id: playerId}, '_id username').exec();
     return {game: newGame, players: player}
 }
 

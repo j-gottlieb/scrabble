@@ -8,19 +8,15 @@ import {
   Toolbar
 } from '@material-ui/core';
 import NavBar from './components/nav_bar'
-import GameStats from './components/game_stats';
-import GameControls from './components/game_controls';
-import GameBoard from './components/game_board';
+import GameContainer from './components/game_container';
 import Portal from './components/portal';
-import {updateBoard, gameWasJoined} from './actions';
-import {socket, GAME_UPDATE_EVENT, GAME_JOIN_EVENT} from './constants'
+import Message from './components/message'
+import {updateBoard, gameWasJoined, beginGame} from './actions';
+import {socket, GAME_UPDATE_EVENT, GAME_JOIN_EVENT, GAME_BEGIN_EVENT} from './constants'
 
 const App = () => {
 
   const dispatch = useDispatch();
-
-  const onUpdateBoard = game => dispatch(updateBoard(game))
-  const onGameWasJoined = game => dispatch(gameWasJoined(game))
 
   const {
     activeGameId
@@ -29,13 +25,21 @@ const App = () => {
   }))
 
   useEffect(() => {
+
+    const onUpdateBoard = game => dispatch(updateBoard(game))
+    const onGameWasJoined = game => dispatch(gameWasJoined(game))
+    const onBeginGame = game => dispatch(beginGame(game))
+
     socket.on(GAME_UPDATE_EVENT, game => {
       onUpdateBoard(game)
     })
     socket.on(GAME_JOIN_EVENT, game => {
       onGameWasJoined(game)
     })
-  }, [activeGameId])
+    socket.on(GAME_BEGIN_EVENT, game => {
+      onBeginGame(game)
+    })
+  }, [activeGameId, dispatch])
 
   return (
     <div>
@@ -49,23 +53,10 @@ const App = () => {
             justify="center"
           >
             <Toolbar />
-            {activeGameId ? (
-              <>
-                <Grid>
-                  <GameStats />
-                </Grid>
-                <Grid>
-                  <GameBoard />
-                </Grid>
-                <Grid>
-                  <GameControls />
-                </Grid>
-              </>
-            ) : (
-              <Portal />
-            )}
+            <Portal />
           </Grid>
         </Container>
+        <Message />
     </div>
   );
 }

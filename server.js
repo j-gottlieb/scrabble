@@ -15,6 +15,7 @@ const Game = require('./models/Game');
 // Queries
 const saveNewGame = require('./queries/new_game');
 const joinGame = require('./queries/join_game');
+const beginGame = require('./queries/begin_game');
 const submitMove = require('./queries/submit_move');
 
 // CSV upload
@@ -67,10 +68,16 @@ io.on('connection', client => {
     });
   })
 
+  // BEGIN GAME
+  client.on('begin-game', async gameId => {
+    const game = await beginGame(gameId)
+    io.sockets.in(gameId).emit('begin-game', game)
+  })
+
   // SUBMIT MOVE
   client.on('submit-move', async ({game, playerId}) => {
-    const updatedGame = await submitMove(game, playerId)
-    io.sockets.in(updatedGame._id).emit('game-update', updatedGame);
+    const {updatedGame, newWords} = await submitMove(game, playerId)
+    io.sockets.in(updatedGame._id).emit('game-update', {updatedGame, newWords});
   })
 
   client.on('disconnect', () => {

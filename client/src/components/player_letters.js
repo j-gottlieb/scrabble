@@ -1,16 +1,27 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import {useSelector, useDispatch} from 'react-redux';
 import {Button} from '@material-ui/core';
-import {connect} from 'react-redux';
 import {handleSelectLetter} from '../actions';
 import {getPlayerHand} from '../selectors';
 
 const HAND_QUANTITY = [0,0,0,0,0,0,0]
 
-const PlayerLetters = ({onSelectLetter, playerHand, selectedLetterIndex}) => {
+const PlayerLetters = () => {
+
+  const {
+    playerHand, 
+    selectedLetterIndex
+  } = useSelector(state => ({
+    playerHand: getPlayerHand(state),
+    selectedLetterIndex: state.selectedLetter.index
+  }))
+
+  const dispatch = useDispatch();
+
   const handleClick = index => {
-    playerHand[index] && onSelectLetter(index)
+    playerHand[index] && dispatch(handleSelectLetter(index))
   }
+
   return (
     <>
       {playerHand != null &&
@@ -18,7 +29,7 @@ const PlayerLetters = ({onSelectLetter, playerHand, selectedLetterIndex}) => {
               <Button
                 key={index}
                 variant="contained"
-                active={index === selectedLetterIndex}
+                active={index === selectedLetterIndex ? 1 : 0}
                 onClick={() => handleClick(index)}
               >
                 {playerHand[index]}
@@ -29,24 +40,4 @@ const PlayerLetters = ({onSelectLetter, playerHand, selectedLetterIndex}) => {
   )
 }
 
-const mapStateToProps = state => ({
-  playerHand: getPlayerHand(state),
-  selectedLetterIndex: state.selectedLetter.index
-})
-
-const mapDispatchToProps = dispatch => ({
-  onSelectLetter: index => dispatch(handleSelectLetter(index))
-})
-
-PlayerLetters.propTypes = {
-  onSelectLetter: PropTypes.func.isRequired,
-  playerHand: PropTypes.arrayOf(PropTypes.string),
-  selectedLetterIndex: PropTypes.number
-}
-
-PlayerLetters.defaultProps = {
-  playerHand: null,
-  selectedLetterIndex: null
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(PlayerLetters)
+export default PlayerLetters

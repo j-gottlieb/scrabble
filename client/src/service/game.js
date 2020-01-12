@@ -10,7 +10,11 @@ export const joinGame = (gameId, playerId) => {
 }
 
 export const rejoinGame = (gameId, playerId) => {
-  socket.emit('rejoin-game', {gameId, playerId})
+  socket.emit('rejoin-game', {gameId, playerId});
+}
+
+export const beginGame = (gameId) => {
+  socket.emit('begin-game', gameId);
 }
 
 export const submitMove = gameState => {

@@ -6,4 +6,8 @@ const getNewGame = playerId => ({
   letterPool: STARTING_LETTERS
 })
 
+const isGameOver = ({letterPool, hands}) =>
+  letterPool.length === 0
+  && hands.some(({letters}) => letters.length === 0)
+
 module.exports = {getNewGame}

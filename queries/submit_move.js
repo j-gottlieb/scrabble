@@ -44,7 +44,7 @@ const submitMove = async (game, playerId) => {
     const {newLetterPool, newWords, newHand} = getNewLettersAndWords(game, playerId)
     const playerWords = await findWordScores(newWords, playerId)
     const updatedGame = await updateGame(game._id, game.board, newLetterPool, playerWords, newHand, playerId)
-    return updatedGame
+    return {updatedGame, newWords: playerWords}
 }
 
 module.exports = submitMove

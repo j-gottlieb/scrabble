@@ -20,6 +20,7 @@
   "dependencies": {
     "@material-ui/core": "^4.8.2",
     "@material-ui/icons": "^4.5.1",
+    "@material-ui/lab": "^4.0.0-alpha.39",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.3",
     "concurrently": "^4.1.2",

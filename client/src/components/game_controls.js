@@ -1,8 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {getIsPlayerTurn, getIsActiveGame} from '../selectors';
+import {useSelector, useDispatch} from 'react-redux';
+import {getIsPlayerTurn} from '../selectors';
 import {submitMove} from '../service/game';
+import {handleShuffleLetters} from '../actions';
 import PlayerLetters from './player_letters';
 import {Button, ButtonGroup} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -18,17 +18,28 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const GameControls = props => {
+const GameControls = () => {
+
+  const {gameState, isPlayerTurn} = useSelector(state => ({
+    gameState: {
+      game: state.game,
+      playerId: state.playerInfo.id
+    },
+    isPlayerTurn: getIsPlayerTurn(state)
+}))
 
   const classes = useStyles();
+
+  const dispatch = useDispatch();
 
   return (
     <div className={classes.root}>
     <ButtonGroup color="primary" aria-label="outlined primary button group">
       <PlayerLetters />
+      <Button onClick={() => dispatch(handleShuffleLetters())}>Shuffle</Button>
       {
-        (props.isPlayerTurn) ? (
-            <Button onClick={() => submitMove(props.gameState)}>Submit Move</Button>
+        (isPlayerTurn) ? (
+            <Button onClick={() => submitMove(gameState)}>Submit Move</Button>
         ) : (
           <p>Wait your turn!</p>
         )
@@ -38,18 +49,4 @@ const GameControls = props => {
   );
 }
 
-const mapStateToProps = state => ({
-  isActiveGame: getIsActiveGame(state),
-  gameState: {
-    game: state.game,
-    playerId: state.playerInfo.id
-  },
-  playerId: state.playerInfo.id,
-  isPlayerTurn: getIsPlayerTurn(state)
-})
-
-GameControls.propTypes = {
-  isActiveGame: PropTypes.bool.isRequired
-}
-
-export default connect(mapStateToProps)(GameControls)
+export default GameControls

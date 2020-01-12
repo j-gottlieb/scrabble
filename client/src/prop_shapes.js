@@ -4,7 +4,7 @@ export const GAME_SHAPE =
     PropTypes.arrayOf(
         PropTypes.shape({
           letterPool: PropTypes.arrayOf(PropTypes.string),
-          isActive: PropTypes.bool,
+          hasBegun: PropTypes.bool,
           _id: PropTypes.string,
           board: PropTypes.arrayOf(
             PropTypes.shape({

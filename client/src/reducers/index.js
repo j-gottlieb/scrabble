@@ -8,13 +8,17 @@ import activeGames from './active_games';
 import selectedGameId from './selected_game_id';
 import showGamesModal from './show_games_modal';
 import currentPlayers from './current_players';
+import message from './message';
+import portalView from './portal_view';
 
 export default combineReducers({
   authMessage,
   game,
   activeGames,
   currentPlayers,
+  message,
   playerInfo,
+  portalView,
   selectedGameId,
   selectedLetter,
   showGamesModal,

@@ -8,23 +8,24 @@ const {getPlayerLetters} = require('../game_logic/turn_management');
  */
 const joinGame = async (gameId, playerId) => {
     const game = await Game.findOne({_id: gameId}).exec();
+    const {username} = await User.findOne({_id: playerId}, 'username').exec();
     const includesCurrentPlayer = game.players.some((player) => playerId == player.playerId)
     if (!includesCurrentPlayer) {
         const {newHand, newLetterPool} = getPlayerLetters([], game.letterPool)
         game.players.push({
             playerId,
-            isOwner: false
+            isOwner: false,
+            username
         })
         game.hands.push({
             letters: newHand,
             playerId
         })
-        game.letterPool = newLetterPool
-        game.save()
+        game.letterPool = newLetterPool;
+        game.save();
     }
     const playerIds = game.players.map(({playerId}) => playerId);
     const players = await User.find({_id: { $in: playerIds}}, '_id username').exec();
-    // TODO select only the fields i need!
     return {game, players}
 }
 

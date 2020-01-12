@@ -60,7 +60,9 @@ const ActiveGames = props => {
     setIsOtherGamesOpen(false)
   }
 
-  const onSelectGame = ({target: {value}}) => dispatch(handleJoinGame(value, playerId))
+  const onSelectGame = ({target: {value}}) => {
+    dispatch(handleJoinGame(value, playerId))
+  }
 
   return (
     <>
@@ -72,11 +74,11 @@ const ActiveGames = props => {
         open={isMyGamesOpen}
         onClose={toggleMyGames}
         onOpen={toggleMyGames}
-        value={null}
+        value={myGames.length > 0 ? myGames[0]._id : ''}
         onChange={onSelectGame}
       >
         {myGames.length === 0 ? (
-          <MenuItem value={null}>No Games Found</MenuItem>
+          <MenuItem value={''}>No Games Found</MenuItem>
           ) : (
           myGames.map(game => (
           <MenuItem
@@ -97,11 +99,11 @@ const ActiveGames = props => {
         open={isOtherGamesOpen}
         onClose={toggleOtherGames}
         onOpen={toggleOtherGames}
-        value={null}
+        value={gamesToJoin.length > 0 ? gamesToJoin[0]._id : ''}
         onChange={onSelectGame}
       >
         {gamesToJoin.length === 0 ? (
-          <MenuItem value={null}>No Games Found</MenuItem>
+          <MenuItem value={''}>No Games Found</MenuItem>
           ) : (
           gamesToJoin.map(game => (
           <MenuItem

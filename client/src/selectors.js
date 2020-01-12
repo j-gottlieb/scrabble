@@ -24,18 +24,14 @@ export const getCurrentGame = ({game}) => game
 export const getGamesToJoin = createSelector(
   activeGames,
   getPlayerId,
-  (games, id) => games.filter(game => (
-      game.isActive === true &&
-      !game.players.some(({playerId}) => playerId === id)
-    )
-  )
+  (games, id) => games.filter(game => !game.hasBegun)
 );
 
 export const getMyGames = createSelector(
   activeGames,
   getPlayerId,
   (games, id) => games.filter(game => (
-      game.isActive === true &&
+      game.hasBegun &&
       game.players.some(({playerId}) => playerId === id)
     )
   )
@@ -74,4 +70,23 @@ export const getActiveGameId = createSelector(
   ({_id}) => _id != null ? _id : null
 )
 
-export const getIsActiveGame = state => state.game.board.length > 0
+export const getIsGameOwner = createSelector(
+  getCurrentGame,
+  getPlayerId,
+  (game, id) => {
+    const player = game.players.find(({playerId}) => id === playerId)
+    return player.isOwner || false
+  }
+)
+
+export const getGameOwner = createSelector(
+  getCurrentGame,
+  currentGame => {
+    return currentGame.players.find(({isOwner}) => isOwner)
+  }
+)
+
+export const getGameOwnerName = createSelector(
+  getGameOwner,
+  ({username}) => username
+)
