@@ -4,12 +4,17 @@ import GameStats from './game_stats';
 import GameControls from './game_controls';
 import GameBoard from './game_board';
 import GameLobby from './game_lobby';
-import {getCurrentGame} from '../selectors';
+import GameOver from './game_over';
+import {getCurrentGame, getIsGameOver} from '../selectors';
 import {Grid} from '@material-ui/core';
 
 const GameContainer = () => {
-    const {gameHasBegun} = useSelector(state => ({
-        gameHasBegun: getCurrentGame(state).hasBegun
+    const {
+        gameHasBegun,
+        isGameOver
+    } = useSelector(state => ({
+        gameHasBegun: getCurrentGame(state).hasBegun,
+        isGameOver: getIsGameOver(state)
     }))
 
     return (
@@ -26,6 +31,9 @@ const GameContainer = () => {
                         <Grid>
                             <GameControls />
                         </Grid>
+                        {isGameOver && (
+                            <GameOver />
+                        )}
                     </>
                 ) : (
                     <GameLobby />   

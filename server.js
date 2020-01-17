@@ -76,8 +76,8 @@ io.on('connection', client => {
 
   // SUBMIT MOVE
   client.on('submit-move', async ({game, playerId}) => {
-    const {updatedGame, newWords} = await submitMove(game, playerId)
-    io.sockets.in(updatedGame._id).emit('game-update', {updatedGame, newWords});
+    const updatedGame = await submitMove(game, playerId)
+    io.sockets.in(updatedGame.updatedGame._id).emit('game-update', updatedGame);
   })
 
   client.on('disconnect', () => {

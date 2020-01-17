@@ -17,9 +17,10 @@ export const getPlayerWords = state =>
     },
   {});
 
-export const activeGames = ({activeGames}) => activeGames
-export const getPlayerId = ({playerInfo}) => playerInfo.id
-export const getCurrentGame = ({game}) => game
+export const activeGames = ({activeGames}) => activeGames;
+export const getPlayerId = ({playerInfo}) => playerInfo.id;
+export const getCurrentGame = ({game}) => game;
+export const getCurrentPlayers = ({currentPlayers}) => currentPlayers;
 
 export const getGamesToJoin = createSelector(
   activeGames,
@@ -89,4 +90,38 @@ export const getGameOwner = createSelector(
 export const getGameOwnerName = createSelector(
   getGameOwner,
   ({username}) => username
+)
+
+export const getIsGameOver = createSelector(
+  getCurrentGame,
+  ({letterPool, hands}) =>
+    letterPool.length === 0
+    && hands.some(({letters}) => letters.length === 0)
+);
+
+export const getVictor = createSelector(
+  getCurrentGame,
+  ({words, players}) => {
+    // [{playerId: score}]
+    const playerScores = words.reduce((scores, {playerId, score}) => {
+      if (scores[playerId]) {
+        scores[playerId].score += score
+      } else {
+        scores[playerId] = {
+          playerId,
+          score
+        }
+      }
+      return scores
+    }, {})
+    let indexOfVictor = 0;
+    for (let i = 1; i < playerScores.length; i++) {
+      if (playerScores[i].score > playerScores[indexOfVictor].score) {
+        indexOfVictor = i;
+      }
+    }
+
+    const {username} = players.find(({playerId}) => playerId === playerScores[indexOfVictor].playerId)
+    return {...playerScores[indexOfVictor], username}
+  }
 )

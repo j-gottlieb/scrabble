@@ -1,9 +1,6 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {
-  onToggleSignInModal,
-  onToggleSignUpModal,
-  showGamesModal,
   changePortalView
 } from '../actions'
 import {
@@ -18,7 +15,6 @@ import {
   MenuItem
 } from '@material-ui/core';
 import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
-import {getNewGame} from '../service/game';
 import {PORTAL_VIEW} from '../constants';
 
 const UserOptions = () => {
@@ -26,17 +22,13 @@ const UserOptions = () => {
     const {
         activeGameName,
         isUserLoggedIn,
-        isActiveGame,
-        playerId
+        isActiveGame
     } = useSelector(state => ({
-        playerId: state.playerInfo.id,
         isUserLoggedIn: !!state.playerInfo.id,
         isActiveGame: !!getActiveGameId(state),
         activeGameName: getCurrentGame(state).name || 'No Active Game'
     }))
-    const toggleLogIn = () => dispatch(onToggleSignInModal())
-    const toggleSignUp = () => dispatch(onToggleSignUpModal())
-    
+
     const changeView = (view, popupState) => () => {
         popupState && popupState.close();
         dispatch(changePortalView(view));

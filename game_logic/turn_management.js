@@ -1,5 +1,7 @@
 const {getRandomIndex} = require('./utility');
 const {STARTING_LETTERS_QUANTITY} = require('./constants')
+const Typo = require('typo-js');
+const dictionary = new Typo('en_US');
 
 const isValidTurn = board => {
   const newLetters = board.reduce((newLetters, {isValidPosition, letter}, index) => {
@@ -108,7 +110,7 @@ const getPlayerLetters = (playerLetters, letterPool) => {
   while (lettersToAddToHand.length < numberOfLettersToDraw) {
     const poolLength = letterPool.length;
     if (poolLength === 0) break;
-    
+
     const randomLetterIndex = getRandomIndex(poolLength)
     lettersToAddToHand.push(...letterPool.splice(randomLetterIndex, 1))
   }
@@ -119,7 +121,10 @@ const getPlayerLetters = (playerLetters, letterPool) => {
   }
 }
 
+const isValidWord = word => dictionary.check(word);
+
 module.exports = {
   isValidTurn,
-  getPlayerLetters
+  getPlayerLetters,
+  isValidWord
 }

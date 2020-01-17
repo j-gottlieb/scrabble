@@ -118,9 +118,18 @@ export const beginGame = game => ({
   payload: {game}
 })
 
-export const updateBoard = ({updatedGame, newWords}) => {
+export const updateBoard = ({
+  updatedGame, 
+  newWords, 
+  fakeAssWords = [], 
+  validUnsavedWords = []
+}) => {
   const newBoard = parseBoard(updatedGame.board)
-  const newWordsMessage = newWords.map(({word, score}) => `${word}: ${score}`).join(', ')
+  // const newWordsMessage = newWords.length ? `${newWords.map(({word, score}) => `${word}: ${score}`).join(', ')}` : '';
+  // const validUnsavedWordsMessage = validUnsavedWords.length ? `Congrats, you found a valid word that's not in our database! (${validUnsavedWords.map(word => word).join(', ')})` : '';
+  // const fakeWordsMessage = fakeAssWords.length ? `Whoops these words are fake... ${fakeAssWords.map(word => word).join(', ')}` : '';
+  // const message = [newWordsMessage, validUnsavedWordsMessage, fakeWordsMessage]
+  // console.log(message)
   return {
     type: GAME.UPDATE_BOARD,
     payload: {
@@ -128,7 +137,11 @@ export const updateBoard = ({updatedGame, newWords}) => {
         ...updatedGame,
         board: newBoard
       },
-      newWordsMessage
+      newWordsMessage: {
+        fakeAssWords,
+        newWords,
+        validUnsavedWords
+      }
     }
   }
 }
@@ -168,7 +181,6 @@ export const handleInputLetter = (e, index) =>
   (dispatch, getState) => {
     const {selectedLetter: {letter: selectedLetter, index: selectedLetterIndex}, game, playerInfo: {id}} = getState()
     const {isValidPosition, letter: playedLetter} = game.board[index];
-    console.log(selectedLetter, playedLetter, selectedLetter === '', playedLetter === '')
     // position is invalid
     if (!isValidPosition ||
       (selectedLetter === '' && playedLetter === '')

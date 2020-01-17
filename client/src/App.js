@@ -8,7 +8,6 @@ import {
   Toolbar
 } from '@material-ui/core';
 import NavBar from './components/nav_bar'
-import GameContainer from './components/game_container';
 import Portal from './components/portal';
 import Message from './components/message'
 import {updateBoard, gameWasJoined, beginGame} from './actions';

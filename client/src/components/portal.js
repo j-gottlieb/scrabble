@@ -5,7 +5,6 @@ import {Paper, Grid} from '@material-ui/core';
 import Auth from './auth';
 import ActiveGames from './active_games';
 import GameContainer from './game_container';
-import { getPlayerId } from '../selectors';
 import { PORTAL_VIEW } from '../constants';
 
 const useStyles = makeStyles(theme => ({
@@ -26,10 +25,8 @@ const Portal = () => {
     const classes = useStyles();
 
     const {
-      showGames,
       portalView
     } = useSelector(state => ({
-      showGames: !getPlayerId(state),
       portalView: state.portalView
     }))
 

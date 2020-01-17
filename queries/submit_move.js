@@ -1,6 +1,6 @@
 const Game = require('../models/Game');
 const {WordFrequency} = require('../models/WordFrequency');
-const {getPlayerLetters} = require('../game_logic/turn_management');
+const {getPlayerLetters, isValidWord} = require('../game_logic/turn_management');
 const {getNewWords} = require('../game_logic/board_parsing');
 
 const getNewLettersAndWords = (currentGame, playerId) => {
@@ -43,8 +43,36 @@ const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playe
 const submitMove = async (game, playerId) => {
     const {newLetterPool, newWords, newHand} = getNewLettersAndWords(game, playerId)
     const playerWords = await findWordScores(newWords, playerId)
-    const updatedGame = await updateGame(game._id, game.board, newLetterPool, playerWords, newHand, playerId)
-    return {updatedGame, newWords: playerWords}
+    const validWords = [];
+    const fakeAssWords = [];
+    // if words did not exist in the db, handle the unknown words
+    if (playerWords.length !== newWords.length) {
+        const wordsNotInDB = newWords.filter(newWord => !playerWords.some(({word}) => word === newWord))
+        // find words that pass the spell check
+        for (let i = 0; i < wordsNotInDB.length; i++) {
+            const currentWord = wordsNotInDB[i]
+            if (isValidWord(currentWord)) {
+                validWords.push(currentWord)
+            } else {
+                fakeAssWords.push(currentWord)
+            }
+        }
+    }
+
+    const updatedGame = await updateGame(
+        game._id, 
+        game.board, 
+        newLetterPool, 
+        playerWords, 
+        newHand, 
+        playerId
+    )
+    return {
+        updatedGame, 
+        newWords: playerWords, 
+        fakeAssWords, 
+        validUnsavedWords: validWords
+    }
 }
 
 module.exports = submitMove

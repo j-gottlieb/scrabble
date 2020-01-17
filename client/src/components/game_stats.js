@@ -12,9 +12,7 @@ import {
   TableHead,
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
-
-const getTotalScore = playerWords =>
-  playerWords.reduce((sum, {score}) => sum += score, 0)
+import {getPlayerScore} from '../game_utility';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -52,7 +50,7 @@ const GameStats = ({players}) => {
           <TableBody>
             <TableRow>
               {Object.keys(players).map((player, index) => (
-                  <TableCell key={index}>{getTotalScore(players[player])}</TableCell>
+                  <TableCell key={index}>{getPlayerScore(players[player])}</TableCell>
               ))}
           </TableRow>
         </TableBody>
