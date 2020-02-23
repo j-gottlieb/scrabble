@@ -1,25 +1,19 @@
-import React from 'react'
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
+import React from 'react';
+import {useDispatch} from 'react-redux';
 import {handleInputLetter} from '../actions'
 
-const BoardSquare = ({letter, index, onInputLetter}) => (
-  <div
-    onClick={e => onInputLetter(e, index)}
-    className="board-square"
-  >
-    <p>{letter}</p>
-  </div>
-);
+const BoardSquare = ({letter, index}) => {
+  const dispatch = useDispatch();
+  const onInputLetter = (e, index) => dispatch(handleInputLetter(e, index))
 
-const mapDispatchToProps = dispatch => ({
-  onInputLetter: (e, index) => dispatch(handleInputLetter(e, index))
-})
+  return (
+    <div
+      onClick={e => onInputLetter(e, index)}
+      className="board-square"
+    >
+      <p>{letter}</p>
+    </div>
+  )
+};
 
-BoardSquare.propTypes = {
-  letter: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
-  onInputLetter: PropTypes.func.isRequired
-}
-
-export default connect(null, mapDispatchToProps)(BoardSquare);
+export default BoardSquare;

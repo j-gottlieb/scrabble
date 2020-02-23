@@ -18,8 +18,6 @@ const GameLobby = () => {
         gameOwnerName: getGameOwnerName(state)
     }))
 
-    console.log(gameOwnerName)
-
     return (
         <>
             Players in the game:

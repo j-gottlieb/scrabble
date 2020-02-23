@@ -125,11 +125,6 @@ export const updateBoard = ({
   validUnsavedWords = []
 }) => {
   const newBoard = parseBoard(updatedGame.board)
-  // const newWordsMessage = newWords.length ? `${newWords.map(({word, score}) => `${word}: ${score}`).join(', ')}` : '';
-  // const validUnsavedWordsMessage = validUnsavedWords.length ? `Congrats, you found a valid word that's not in our database! (${validUnsavedWords.map(word => word).join(', ')})` : '';
-  // const fakeWordsMessage = fakeAssWords.length ? `Whoops these words are fake... ${fakeAssWords.map(word => word).join(', ')}` : '';
-  // const message = [newWordsMessage, validUnsavedWordsMessage, fakeWordsMessage]
-  // console.log(message)
   return {
     type: GAME.UPDATE_BOARD,
     payload: {

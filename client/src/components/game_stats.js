@@ -31,10 +31,13 @@ const useStyles = makeStyles(theme => ({
   table: {}
 }));
 
-const GameStats = ({players}) => {
+const GameStats = () => {
   const classes = useStyles();
 
-  const currentPlayers = useSelector(state => state.currentPlayers);
+  const {currentPlayers, playerWords} = useSelector(state => ({
+    currentPlayers: state.currentPlayers,
+    playerWords: getPlayerWords(state)
+  }));
 
   return (
     <>
@@ -49,8 +52,8 @@ const GameStats = ({players}) => {
           </TableHead>
           <TableBody>
             <TableRow>
-              {Object.keys(players).map((player, index) => (
-                  <TableCell key={index}>{getPlayerScore(players[player])}</TableCell>
+              {Object.keys(playerWords).map((player, index) => (
+                  <TableCell key={index}>{getPlayerScore(playerWords[player])}</TableCell>
               ))}
           </TableRow>
         </TableBody>
@@ -60,12 +63,4 @@ const GameStats = ({players}) => {
   )
 }
 
-const mapStateToProps = state => ({
-  players: getPlayerWords(state)
-})
-
-GameStats.propTypes = {
-  players: PropTypes.object
-}
-
-export default connect(mapStateToProps)(GameStats)
+export default GameStats

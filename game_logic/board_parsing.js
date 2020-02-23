@@ -1,4 +1,4 @@
-const getNewWords = (oldWords, board, playerId) =>
+const getNewWordsFromBoard = (oldWords, board) =>
   getAllWords(board)
     .filter(word => !oldWords.includes(word))
 
@@ -6,24 +6,20 @@ const getAllWords = board =>
   [...getHorizontalWords(board), ...getVerticalWords(board)];
 
 const getHorizontalWords = board => {
-  let isContiguousWord = false;
   const allWords = [];
   let currentWord = []
 
   for (let i = 0; i < board.length; i++) {
     const currentLetter = board[i].letter
     if (currentLetter !== '') {
-      isContiguousWord = true
       currentWord.push(currentLetter)
       if (i % 15 === 14) {
-        isContiguousWord = false
         if (currentWord.length > 1) {
           allWords.push(currentWord.join(''))
           currentWord = []
         }
       }
     } else {
-      isContiguousWord = false
       if (currentWord.length > 1) {
         allWords.push(currentWord.join(''))
       }
@@ -34,7 +30,6 @@ const getHorizontalWords = board => {
 }
 
 const getVerticalWords = board => {
-  let isContiguousWord = false;
 
   const allWords = [];
   let currentWord = []
@@ -43,17 +38,14 @@ const getVerticalWords = board => {
     for (let i = j; i < board.length; i += 15) {
       const currentLetter = board[i].letter
       if (currentLetter !== '') {
-        isContiguousWord = true
         currentWord.push(currentLetter)
         if ((224 - i) < 15) {
-          isContiguousWord = false
           if (currentWord.length > 1) {
             allWords.push(currentWord.join(''))
             currentWord = []
           }
         }
       } else {
-        isContiguousWord = false
         if (currentWord.length > 1) {
           allWords.push(currentWord.join(''))
         }
@@ -62,6 +54,10 @@ const getVerticalWords = board => {
     }
   }
   return allWords
+}
+
+const getIndexesOfNewLetters = board => {
+  
 }
 
 
@@ -73,5 +69,5 @@ const getEmptyBoard = () =>
 
 module.exports = {
   getEmptyBoard,
-  getNewWords
+getNewWordsFromBoard
 }

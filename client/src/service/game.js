@@ -1,5 +1,6 @@
 import {socket} from '../constants'
 import wretch from 'wretch';
+import {url} from '../constants';
 
 export const getNewGame = (playerId, name) => {
   socket.emit('new-game', {playerId, name})
@@ -22,6 +23,6 @@ export const submitMove = gameState => {
 }
 
 export const getActiveGames = () =>
-  wretch('http://localhost:5000/api/games')
+  wretch(`${url}api/games`)
     .get()
     .json();

@@ -1,22 +1,44 @@
 const Game = require('../models/Game');
 const {WordFrequency} = require('../models/WordFrequency');
 const {getPlayerLetters, isValidWord} = require('../game_logic/turn_management');
-const {getNewWords} = require('../game_logic/board_parsing');
+const {getNewWordsFromBoard} = require('../game_logic/board_parsing');
 
-const getNewLettersAndWords = (currentGame, playerId) => {
-    const {board, letterPool} = currentGame;
+const getNewWords = currentGame => {
+    const {board} = currentGame;
     // get previously played words
     const oldWords = currentGame.words.length > 0 ? currentGame.words.map(({word}) => word) : [];
     // find newly placed words
-    const newWords = getNewWords(oldWords, board, playerId)
+    return getNewWordsFromBoard(oldWords, board)
+}
+
+const updateLetterPoolAndHand = (currentGame, playerId) => {
+    const {letterPool} = currentGame;
 
     const indexOfHand = currentGame.hands.findIndex(hand => hand.playerId == playerId)
 
     const {letters} = currentGame.hands[indexOfHand]
 
-    const {newHand, newLetterPool} = getPlayerLetters(letters, letterPool)
+    return getPlayerLetters(letters, letterPool)
+}
 
-    return {newLetterPool, newWords, newHand}
+const categorizeNewWords = async (newWords, playerId) => {
+    const playerWords = await findWordScores(newWords, playerId)
+    const validWords = [];
+    const fakeAssWords = [];    
+
+    if (playerWords.length !== newWords.length) {
+        const wordsNotInDB = newWords.filter(newWord => !playerWords.some(({word}) => word === newWord))
+        // find words that pass the spell check
+        for (let i = 0; i < wordsNotInDB.length; i++) {
+            const currentWord = wordsNotInDB[i]
+            if (isValidWord(currentWord)) {
+                validWords.push(currentWord)
+            } else {
+                fakeAssWords.push(currentWord)
+            }
+        }
+    }
+    return {playerWords, validWords, fakeAssWords}
 }
 
 const findWordScores = async (newWords, playerId) => {
@@ -40,38 +62,38 @@ const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playe
     return updatedGame
 }
 
-const submitMove = async (game, playerId) => {
-    const {newLetterPool, newWords, newHand} = getNewLettersAndWords(game, playerId)
-    const playerWords = await findWordScores(newWords, playerId)
-    const validWords = [];
-    const fakeAssWords = [];
-    // if words did not exist in the db, handle the unknown words
-    if (playerWords.length !== newWords.length) {
-        const wordsNotInDB = newWords.filter(newWord => !playerWords.some(({word}) => word === newWord))
-        // find words that pass the spell check
-        for (let i = 0; i < wordsNotInDB.length; i++) {
-            const currentWord = wordsNotInDB[i]
-            if (isValidWord(currentWord)) {
-                validWords.push(currentWord)
-            } else {
-                fakeAssWords.push(currentWord)
-            }
-        }
-    }
+const getGameFromPreviousState = async _id =>
+    await Game.findOne({_id})
 
-    const updatedGame = await updateGame(
-        game._id, 
-        game.board, 
-        newLetterPool, 
-        playerWords, 
-        newHand, 
-        playerId
-    )
-    return {
-        updatedGame, 
-        newWords: playerWords, 
-        fakeAssWords, 
-        validUnsavedWords: validWords
+const submitMove = async (game, playerId) => {
+    const newWords = getNewWords(game)
+
+    const {playerWords, validWords, fakeAssWords} = await categorizeNewWords(newWords, playerId)
+// TODO ADD validWords to playerWords with full score!
+    if (fakeAssWords.length > 0) {
+        const updatedGame = await getGameFromPreviousState(game._id)
+        return {
+            updatedGame, 
+            newWords: playerWords, 
+            fakeAssWords, 
+            validUnsavedWords: validWords
+        }
+    } else {
+        const {newLetterPool, newHand} = updateLetterPoolAndHand(game, playerId)
+        const updatedGame = await updateGame(
+            game._id, 
+            game.board, 
+            newLetterPool, 
+            playerWords, 
+            newHand, 
+            playerId
+        )
+        return {
+            updatedGame, 
+            newWords: playerWords, 
+            fakeAssWords, 
+            validUnsavedWords: validWords
+        }
     }
 }
 
