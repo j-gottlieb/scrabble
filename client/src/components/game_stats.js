@@ -1,6 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import {connect, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {getPlayerWords} from '../selectors';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -13,6 +12,7 @@ import {
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
 import {getPlayerScore} from '../game_utility';
+import PlayedWords from './played_words';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -45,8 +45,10 @@ const GameStats = () => {
         <Table className={classes.table} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              {currentPlayers.map(({username}, index) => (
-                <TableCell key={index}>{username}</TableCell>
+              {currentPlayers.map(({username, _id}, index) => (
+                <TableCell key={index}>
+                  <PlayedWords playerId={_id} username={username} />
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>

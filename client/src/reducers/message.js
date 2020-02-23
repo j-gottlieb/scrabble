@@ -10,7 +10,7 @@ const message = (state = '', action) => {
     case GAME.UPDATE_BOARD:
         return action.payload.newWordsMessage
     default:
-        return ''
+        return state
   }
 }
 

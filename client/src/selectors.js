@@ -87,6 +87,14 @@ export const getGameOwner = createSelector(
   }
 )
 
+export const getPlayerNameById = playerId => createSelector(
+  getCurrentGame,
+  currentGame => {
+    const player = currentGame.players.find(({_id}) => playerId === _id)
+    return player.username || ''
+  }
+)
+
 export const getGameOwnerName = createSelector(
   getGameOwner,
   ({username}) => username

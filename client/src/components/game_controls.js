@@ -34,16 +34,16 @@ const GameControls = () => {
 
   return (
     <div className={classes.root}>
-    <ButtonGroup color="primary" aria-label="outlined primary button group">
-      <PlayerLetters />
-      <Button onClick={() => dispatch(handleShuffleLetters())}>Shuffle</Button>
-      {
-        (isPlayerTurn) ? (
-            <Button onClick={() => submitMove(gameState)}>Submit Move</Button>
-        ) : (
-          <p>Wait your turn!</p>
-        )
-      }
+      <ButtonGroup color="primary" aria-label="outlined primary button group">
+        <PlayerLetters />
+        <Button onClick={() => dispatch(handleShuffleLetters())}>Shuffle</Button>
+        {
+          (isPlayerTurn) ? (
+              <Button onClick={() => submitMove(gameState)}>Submit Move</Button>
+          ) : (
+            <p>Wait your turn!</p>
+          )
+        }
       </ButtonGroup>
     </div>
   );

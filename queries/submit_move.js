@@ -63,7 +63,10 @@ const updateGame = async (_id, board, newLetterPool, playerWords, newHand, playe
 }
 
 const getGameFromPreviousState = async _id =>
-    await Game.findOne({_id})
+    await Game.findOneAndUpdate(
+        {_id},
+        {$inc: {turnNumber: 1}},
+        {new: true, useFindAndModify: false}).exec();
 
 const submitMove = async (game, playerId) => {
     const newWords = getNewWords(game)

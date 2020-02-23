@@ -1,9 +1,7 @@
 import React from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import PropTypes from 'prop-types';
+import {useSelector} from 'react-redux';
 import BoardSquare from './board_square'
 import {getBoard} from '../selectors'
-import {connect} from 'react-redux'
 
 const GameBoard = () => {
   
