@@ -145,7 +145,7 @@ app.delete('/games', (req, res) => {
   })
 });
 
-// Serve static assets in in prod
+// Serve static assets in prod
 if (process.env.NODE_ENV === 'production') {
   // Set static folder
   app.use(express.static('client/build'));

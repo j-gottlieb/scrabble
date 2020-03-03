@@ -66,7 +66,7 @@ const PlayedWords = ({playerId, username}) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {playerWords[playerId].map((row, index) => (
+                        {(playerId in playerWords) && playerWords[playerId].map((row, index) => (
                             <TableRow key={`${index}.${row.id}`}>
                                 {columns.map(({id}) => (
                                     <TableCell key={row[id]}>{row[id]}</TableCell>
