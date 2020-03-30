@@ -17,6 +17,7 @@ const saveNewGame = require('./queries/new_game');
 const joinGame = require('./queries/join_game');
 const beginGame = require('./queries/begin_game');
 const submitMove = require('./queries/submit_move');
+const {updateWordFrequencies} = require('./queries/update_word_frequencies')
 
 // CSV upload
 const json2csv = require('json2csv');
@@ -86,27 +87,27 @@ io.on('connection', client => {
 });
 
 app.post('/word_frequencies', (req, res) => {
-  console.log(req.file, 'upload')
-  if (!req.files)
-        return res.status(400).send('No files were uploaded.');
-    const wordFrequenciesFile = req.files.word_frequencies;
-    const wordFrequencies = [];
+  updateWordFrequencies(req.body)
+  // if (!req.files)
+  //       return res.status(400).send('No files were uploaded.');
+  //   const wordFrequenciesFile = req.files.word_frequencies;
+  //   const wordFrequencies = [];
 
-    csv
-     .fromString(wordFrequenciesFile.data.toString(), {
-         headers: true,
-         ignoreEmpty: true
-     })
-     .on("data", (data) => {
-         data['_id'] = new mongoose.Types.ObjectId();
-         wordFrequencies.push(data);
-     })
-     .on("end", () => {
-         WordFrequency.collection.insert(wordFrequencies, (err, documents) => {
-            if (err) throw err;
-         });
-         res.send(wordFrequencies.length + ' wordFrequencies have been successfully uploaded.');
-     });
+  //   csv
+  //    .fromString(wordFrequenciesFile.data.toString(), {
+  //        headers: true,
+  //        ignoreEmpty: true
+  //    })
+  //    .on("data", (data) => {
+  //        data['_id'] = new mongoose.Types.ObjectId();
+  //        wordFrequencies.push(data);
+  //    })
+  //    .on("end", () => {
+  //        WordFrequency.collection.insert(wordFrequencies, (err, documents) => {
+  //           if (err) throw err;
+  //        });
+  //        res.send(wordFrequencies.length + ' wordFrequencies have been successfully uploaded.');
+  //    });
 })
 
 app.get('/word_frequencies/:word', (req, res) => {
@@ -121,6 +122,7 @@ app.get('/word_frequencies/:word', (req, res) => {
     }
   })
 });
+
 app.get('/word_frequencies', (req, res) => {
   const word = req.params.word
   WordFrequency.find({}, (err, data) => {
@@ -133,6 +135,7 @@ app.get('/word_frequencies', (req, res) => {
     }
   })
 });
+
 app.delete('/word_frequencies', (req, res) => {
   WordFrequency.remove({}, (err, data) => {
     res.send('removed docs')
