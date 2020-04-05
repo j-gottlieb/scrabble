@@ -1,6 +1,7 @@
 const {WordFrequency} = require('../models/WordFrequency')
 const rp = require('request-promise');
 const cheerio = require('cheerio');
+var async = require('async');
 const ObjectsToCsv = require('objects-to-csv');
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
@@ -55,32 +56,29 @@ const getRandomUrl = (html) => {
   return urls[Math.floor(Math.random() * urls.length)] || wikipediaUrl
 }
 
-const maxAttempts = 1
+const maxAttempts = 100
 let attemptCount = 0
 
-const recursiveCrawl = () =>
-  new Promise(async (res, rej) => {
-    res(crawl())
-  })
-
-const crawl = async (url = wikipediaUrl) => {
+const recursiveCrawl = async () => {
   let wordFrequencies = {}
+  let url = wikipediaUrl
+  while (attemptCount < maxAttempts) {
+    const result = await crawl(wordFrequencies, url)
+    wordFrequencies = result.wordFrequencies
+    url = result.url
+    attemptCount++
+  }
+  return wordFrequencies
+}
+
+const crawl = async (wordFrequencies, url) => {
   try {
-      console.log(attemptCount)
       const html = await rp(url)
-      wordFrequencies = countWords(wordFrequencies, html)
-      if (attemptCount < maxAttempts) {
-        const url = getRandomUrl(html)
-        attemptCount++
-        crawl(url)
-      } else {
-        console.log(wordFrequencies)
-        return wordFrequencies
-      }
+      const newWordFrequencies = countWords(wordFrequencies, html)
+      const newUrl = getRandomUrl(html)
+      return {wordFrequencies: newWordFrequencies, url: newUrl}
   } catch(e) {
-    if (attemptCount < maxAttempts) {
-      crawl()
-    }
+      return {wordFrequencies, url}
   }
 }
 
@@ -91,19 +89,25 @@ const crawl = async (url = wikipediaUrl) => {
 
 
 
-
 const updateWordFrequencies = async () => {
-  recursiveCrawl()
-    .then(frequencies => console.log(frequencies))
-  // incrementWordFrequencies(newFrequencies)
+  const frequencies = await recursiveCrawl()
+  console.log(frequencies)
+  const numberOfNewWords = await incrementWordFrequencies(frequencies)
+  // console.log(numberOfNewWords.length)
   // updatePercentiles()
 }
 
-const incrementWordFrequencies = newFrequencies => {
-  console.log('herefirst')
-  newFrequencies.forEach((word, count) => {
-    console.log('here')
-    WordFrequency.findOneAndUpdate({word}, {$inc : {count}}).exec()
+
+
+const incrementWordFrequencies = async newFrequencies => {
+  await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}}, (err, words) => {
+    // if word doesn't exist save it!
+    words.forEach(entry => {
+      const {word} = entry;
+      const count = newFrequencies[word];
+      entry.frequency += count
+      entry.save()
+    })
   })
 }
 
