@@ -8,14 +8,16 @@ export const getBoard = state => state.game.board;
 export const getSelectedLetter = ({playerHand, selectedLetter}) =>
   playerHand[selectedLetter]
 
-export const getPlayerWords = state =>
-    state.game.words.reduce((allWords, {word, playerId, score}) => {
-      allWords[playerId] = allWords[playerId]
-      ? [...allWords[playerId], {word, score}]
-      : [{word, score}]
-      return allWords
-    },
-  {});
+export const getPlayerWords = state => {
+  const playerWords = [];
+  state.currentPlayers.forEach(({_id}) => {
+    playerWords[_id] = []
+  });
+  state.game.words.forEach(({word, playerId, score}) => {
+    playerWords[playerId] = [...playerWords[playerId], {word, score}]
+  })
+  return playerWords
+}
 
 export const activeGames = ({activeGames}) => activeGames;
 export const getPlayerId = ({playerInfo}) => playerInfo.id;

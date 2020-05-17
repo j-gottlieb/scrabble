@@ -18,14 +18,9 @@ const joinGame = require('./queries/join_game');
 const beginGame = require('./queries/begin_game');
 const submitMove = require('./queries/submit_move');
 const {updateWordFrequencies} = require('./queries/update_word_frequencies')
+const {deleteInvalidWords} = require('./queries/delete_invalid_words');
 
-// CSV upload
-const json2csv = require('json2csv');
-const csv = require('fast-csv');
-const fileUpload = require('express-fileupload');
-const Joi = require('joi');
 const {WordFrequency} = require('./models/WordFrequency')
-app.use(fileUpload());
 
 // Bodyparser Middleware
 app.use(express.json());
@@ -138,9 +133,7 @@ app.get('/word_frequencies', (req, res) => {
 });
 
 app.delete('/word_frequencies', (req, res) => {
-  WordFrequency.remove({}, (err, data) => {
-    res.send('removed docs')
-  })
+  deleteInvalidWords()
 });
 
 app.delete('/games', (req, res) => {

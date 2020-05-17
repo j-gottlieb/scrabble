@@ -1,19 +1,11 @@
 const {WordFrequency} = require('../models/WordFrequency')
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-var async = require('async');
-const ObjectsToCsv = require('objects-to-csv');
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const wikipediaUrl = 'https://en.wikipedia.org/wiki/Special:Random'
 const flexiconUrl = 'localhost5000/word_frequencies' || 'https://flexicon-game.herokuapp.com/word_frequencies'
 
-const isValidWord = word => {
-  const lowerCaseLetterRegex = /^[a-z]+$/;
 
-  return lowerCaseLetterRegex.test(word)
-  // && dictionary.check(word)
-}
 
 const getWords = (html) => {
   const $ = cheerio.load(html)
@@ -113,7 +105,6 @@ const incrementWordFrequencies = async newFrequencies => {
 
 const updatePercentiles = async () => {
   const allFrequencies = await WordFrequency.find({}).exec()
-  console.log(allFrequencies)
   const newPercentiles = setRanksAndPercentiles(allFrequencies)
   newPercentiles.forEach(({word, percentile, score}) => {
     WordFrequency.findOneAndUpdate({word}, {percentile, score})
