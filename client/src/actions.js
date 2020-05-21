@@ -172,9 +172,10 @@ export const unplayLetter = payload => ({
   payload
 })
 
-export const handleInputLetter = (e, index) =>
+export const handleInputLetter = ({selectedLetterIndex, selectedLetter}, index) =>
   (dispatch, getState) => {
-    const {selectedLetter: {letter: selectedLetter, index: selectedLetterIndex}, game, playerInfo: {id}} = getState()
+    // const {selectedLetter: {letter: selectedLetter, index: selectedLetterIndex}, game, playerInfo: {id}} = getState()
+    const {game, playerInfo: {id}} = getState()
     const {isValidPosition, letter: playedLetter} = game.board[index];
     // position is invalid
     if (!isValidPosition ||
@@ -242,3 +243,44 @@ export const handleInputLetter = (e, index) =>
       })
     }
 
+  export const handleRetractPlayedLetters = () =>
+    (dispatch, getState) => {
+      const state = getState();
+      const game = getCurrentGame(state);
+      const {board, hands} = game;
+      const playerHand = getPlayerHand(state);
+      const id = getPlayerId(state);
+
+      const lettersToRetract = [];
+      const newBoard = [];
+      for (let i = 0; i < board.length; i++) {
+        const {isValidPosition, letter} = board[i];
+        if (letter !== '' && isValidPosition) {
+          lettersToRetract.push(letter)
+          newBoard.push({...board[i], letter: ''})
+        } else {
+          newBoard.push(board[i])
+        }
+      }
+      
+      const indexOfPlayer = hands.findIndex(({playerId}) => playerId === id);
+      const newHands = [
+        ...hands.slice(0, indexOfPlayer),
+        {
+          ...hands[indexOfPlayer],
+          letters: [...playerHand, ...lettersToRetract]
+        },
+        ...hands.slice(indexOfPlayer + 1)
+      ];
+
+      dispatch({
+        type: GAME.RETRACT_LETTERS,
+        payload: {
+          game: {
+            ...game,
+            board: newBoard,
+            hands: newHands
+          }
+        }
+      })
+    }

@@ -1,11 +1,13 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {getIsPlayerTurn} from '../selectors';
+import {getIsPlayerTurn, getPlayerHand} from '../selectors';
 import {submitMove} from '../service/game';
-import {handleShuffleLetters} from '../actions';
-import PlayerLetters from './player_letters';
+import {handleShuffleLetters, handleRetractPlayedLetters} from '../actions';
+import PlayerLetter from './player_letter';
 import {Button, ButtonGroup} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+
+const HAND_QUANTITY = [0,0,0,0,0,0,0]
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,12 +18,16 @@ const useStyles = makeStyles(theme => ({
       margin: theme.spacing(1),
     },
   },
+  tiles: {
+    display: 'flex'
+  }
 }));
 
 const GameControls = () => {
 
   const {gameState, isPlayerTurn} = useSelector(state => ({
     gameState: {
+      playerHand: getPlayerHand(state),
       game: state.game,
       playerId: state.playerInfo.id
     },
@@ -34,16 +40,19 @@ const GameControls = () => {
 
   return (
     <div className={classes.root}>
-      <ButtonGroup color="primary" aria-label="outlined primary button group">
-        <PlayerLetters />
-        <Button onClick={() => dispatch(handleShuffleLetters())}>Shuffle</Button>
+      <div className={classes.tiles} >
         {
-          (isPlayerTurn) ? (
-              <Button onClick={() => submitMove(gameState)}>Submit Move</Button>
-          ) : (
-            <p>Wait your turn!</p>
-          )
+          HAND_QUANTITY.map((el, index) => (
+            <PlayerLetter
+              letterIndex={index}
+            />
+          ))
         }
+      </div>
+      <ButtonGroup color="primary" aria-label="outlined primary button group">
+        <Button onClick={() => dispatch(handleShuffleLetters())}>Shuffle</Button>
+        <Button disabled={isPlayerTurn} onClick={() => submitMove(gameState)}>Submit Move</Button>
+        <Button onClick={() => dispatch(handleRetractPlayedLetters())}>Retract Letters</Button>
       </ButtonGroup>
     </div>
   );

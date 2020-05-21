@@ -17,6 +17,7 @@ const game = (
     case GAME.PLAYER_JOINED:
     case GAME.BEGIN_GAME:
     case GAME.SHUFFLE_HAND:
+    case GAME.RETRACT_LETTERS:
       return action.payload.game
     default:
       return state

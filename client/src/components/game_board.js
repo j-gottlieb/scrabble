@@ -3,6 +3,15 @@ import {useSelector} from 'react-redux';
 import BoardSquare from './board_square'
 import {getBoard} from '../selectors'
 
+const styles = {
+  height: '604px',
+  width: '604px',
+  display: 'flex',
+  flexWrap: 'wrap',
+  // alignContent: 'flex-start',
+  border: '2px solid grey',
+}
+
 const GameBoard = () => {
   
   const {gameName, board} = useSelector(state => ({
@@ -14,7 +23,7 @@ const GameBoard = () => {
     <>
       {gameName}
       {board.length > 0 && (
-        <div className="board">
+        <div style={{...styles}}>
             {board.map(({letter}, index) => (
               <BoardSquare
                 key={index}

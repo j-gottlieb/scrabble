@@ -7,6 +7,8 @@ import GameLobby from './game_lobby';
 import GameOver from './game_over';
 import {getCurrentGame, getIsGameOver} from '../selectors';
 import {Grid} from '@material-ui/core';
+import { DndProvider } from 'react-dnd'
+import Backend from 'react-dnd-html5-backend'
 
 const GameContainer = () => {
     const {
@@ -25,12 +27,14 @@ const GameContainer = () => {
                         <Grid>
                             <GameStats />
                         </Grid>
-                        <Grid>
-                            <GameBoard />
-                        </Grid>
-                        <Grid>
-                            <GameControls />
-                        </Grid>
+                        <DndProvider backend={Backend}>
+                            <Grid>
+                                <GameBoard />
+                            </Grid>
+                            <Grid>
+                                <GameControls />
+                            </Grid>
+                        </DndProvider>
                         {isGameOver && (
                             <GameOver />
                         )}
