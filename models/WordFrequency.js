@@ -3,7 +3,11 @@ const Schema = mongoose.Schema;
 
 const WordFrequency = mongoose.model('WordFrequency', new Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  word: String,
+  word: {
+    type: String,
+    required: true,
+    unique: true
+  },
   frequency: Number,
   count: Number,
   rank: Number,

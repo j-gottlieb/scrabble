@@ -82,8 +82,8 @@ io.on('connection', client => {
 });
 
 app.post('/word_frequencies', async (req, res) => {
-  
-  await res.send(updateWordFrequencies(req.body))
+  await updateWordFrequencies()
+  await res.send('yo')
   // if (!req.files)
   //       return res.status(400).send('No files were uploaded.');
   //   const wordFrequenciesFile = req.files.word_frequencies;

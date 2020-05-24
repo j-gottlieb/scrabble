@@ -2,10 +2,16 @@ const {WordFrequency} = require('../models/WordFrequency')
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
-const wikipediaUrl = 'https://en.wikipedia.org/wiki/Special:Random'
-const flexiconUrl = 'localhost5000/word_frequencies' || 'https://flexicon-game.herokuapp.com/word_frequencies'
+const wikipediaUrl = /**'https://nytimes.com'**/ 'https://en.wikipedia.org/wiki/Special:Random'
+const flexiconUrl = 'localhost:5000/word_frequencies' || 'https://flexicon-game.herokuapp.com/word_frequencies'
+const Typo = require("typo-js");
+const dictionary = new Typo('en_US', false, false, {dictionaryPath: "../dictionary"});
 
+const isValidWord = word => {
+  const lowerCaseLetterRegex = /^[a-z]+$/;
 
+  return dictionary.check(word) && lowerCaseLetterRegex.test(word)
+}
 
 const getWords = (html) => {
   const $ = cheerio.load(html)
@@ -45,10 +51,14 @@ const getRandomUrl = (html) => {
       urls.push(href)
     }
   })
-  return urls[Math.floor(Math.random() * urls.length)] || wikipediaUrl
+  let url = urls[Math.floor(Math.random() * urls.length)] || wikipediaUrl
+  while (url.includes('facebook')) {
+    url = urls[Math.floor(Math.random() * urls.length)] || wikipediaUrl
+  }
+  return url
 }
 
-const maxAttempts = 100
+const maxAttempts = 10
 let attemptCount = 0
 
 const recursiveCrawl = async () => {
@@ -70,62 +80,82 @@ const crawl = async (wordFrequencies, url) => {
       const newUrl = getRandomUrl(html)
       return {wordFrequencies: newWordFrequencies, url: newUrl}
   } catch(e) {
-      return {wordFrequencies, url}
+      return {wordFrequencies, url: wikipediaUrl}
   }
 }
 
 
-
-
-
-
-
-
 const updateWordFrequencies = async () => {
+  // get new frequencies
   const frequencies = await recursiveCrawl()
-  console.log(frequencies)
-  const numberOfNewWords = await incrementWordFrequencies(frequencies)
-  // console.log(numberOfNewWords.length)
-  // updatePercentiles()
+  // Add new counts to existing counts
+  await incrementWordFrequencies(frequencies)
+  // Recalculate percentiles and rankings
+  await updatePercentiles()
 }
 
-
-
 const incrementWordFrequencies = async newFrequencies => {
-  await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}}, (err, words) => {
-    // if word doesn't exist save it!
-    words.forEach(entry => {
-      const {word} = entry;
-      const count = newFrequencies[word];
-      entry.frequency += count
-      entry.save()
+  const map = {}
+  const idsToDelete = []
+  await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}})
+    .exec()
+    .then((words) => {
+      words.forEach((entry, index) => {
+        const {word, _id} = entry;
+        const count = newFrequencies[word];
+        if (!map[word]) {
+          map[word] = entry.frequency
+        } else if (map[word] > entry.frequency) {
+          entry.frequency = map[word]
+        }
+        idsToDelete.push(entry._id)
+      })
     })
+
+  await WordFrequency.deleteMany({_id: {$in: idsToDelete}}).exec()
+
+  const formattedFrequencies = Object.keys(map).map(word => {
+    return {word, frequency: map[word]}
   })
+
+  await WordFrequency.insertMany(formattedFrequencies)
 }
 
 const updatePercentiles = async () => {
-  const allFrequencies = await WordFrequency.find({}).exec()
-  const newPercentiles = setRanksAndPercentiles(allFrequencies)
-  newPercentiles.forEach(({word, percentile, score}) => {
-    WordFrequency.findOneAndUpdate({word}, {percentile, score})
-  })
+  await WordFrequency.find({})
+    .lean()
+    .exec()
+    .then(words => {
+      const newPercentiles = setRanksAndPercentiles(words)
+      return newPercentiles
+    })
+    .then(newPercentiles => {
+      newPercentiles.forEach(({word, percentile, score}) => {
+          WordFrequency.findOneAndUpdate({word}, {percentile, score}, (err, doc) => {
+            if (err) {
+              console.log('err', err)
+            } else {
+              console.log(`${word} - percentile: ${percentile}, score: ${score}`)
+            }
+          })
+      })
+    })
 }
 
 const setRanksAndPercentiles = frequencies => {
   const sortedWordArray = frequencies.sort((a, b) => b.frequency - a.frequency)
   const distinctFrequencies = {}
-  wordArray.forEach(({count}) => {
-    if (!distinctFrequencies[count]) {
-      distinctFrequencies[count] = 1
+  sortedWordArray.forEach(({frequency}) => {
+    if (!distinctFrequencies[frequency]) {
+      distinctFrequencies[frequency] = 1
     }
   })
   const wordsWithRank = sortedWordArray.map(word => {
-    const rank = Object.keys(distinctFrequencies).filter(count => count > word.count).length
+    const rank = Object.keys(distinctFrequencies).filter(frequency => frequency > word.frequency).length
     return {...word, rank}
   })
 
   const highestRank = Math.max(...wordsWithRank.map(({rank}) => rank))
-
   return wordsWithRank
     .map(word => {
       const percentile = Math.round(100 / highestRank * word.rank)
@@ -133,4 +163,4 @@ const setRanksAndPercentiles = frequencies => {
   })
 }
 
-module.exports = {updateWordFrequencies}
+module.exports = {updateWordFrequencies, isValidWord}
