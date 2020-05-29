@@ -34,7 +34,8 @@ const db = config.get('mongoURI');
 mongoose
   .connect(db, {
     useNewUrlParser: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useUnifiedTopology: true
   })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
@@ -134,6 +135,7 @@ app.get('/word_frequencies', (req, res) => {
 
 app.delete('/word_frequencies', (req, res) => {
   deleteInvalidWords()
+  res.send('deleted lots of words')
 });
 
 app.delete('/games', (req, res) => {

@@ -1,11 +1,11 @@
-const {WordFrequency} = require('../models/WordFrequency')
+const {WordFrequency, WordFrequencyBackup} = require('../models/WordFrequency')
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
 const wikipediaUrl = /**'https://nytimes.com'**/ 'https://en.wikipedia.org/wiki/Special:Random'
 const flexiconUrl = 'localhost:5000/word_frequencies' || 'https://flexicon-game.herokuapp.com/word_frequencies'
 const Typo = require("typo-js");
-const dictionary = new Typo('en_US', false, false, {dictionaryPath: "../dictionary"});
+const dictionary = new Typo('en_US', false, false, {dictionaryPath: "./dictionary"});
 
 const isValidWord = word => {
   const lowerCaseLetterRegex = /^[a-z]+$/;
@@ -84,7 +84,6 @@ const crawl = async (wordFrequencies, url) => {
   }
 }
 
-
 const updateWordFrequencies = async () => {
   // get new frequencies
   const frequencies = await recursiveCrawl()
@@ -95,6 +94,7 @@ const updateWordFrequencies = async () => {
 }
 
 const incrementWordFrequencies = async newFrequencies => {
+  console.log()
   const map = {}
   const idsToDelete = []
   await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}})
@@ -122,24 +122,22 @@ const incrementWordFrequencies = async newFrequencies => {
 }
 
 const updatePercentiles = async () => {
-  await WordFrequency.find({})
-    .lean()
-    .exec()
-    .then(words => {
-      const newPercentiles = setRanksAndPercentiles(words)
-      return newPercentiles
-    })
-    .then(newPercentiles => {
-      newPercentiles.forEach(({word, percentile, score}) => {
-          WordFrequency.findOneAndUpdate({word}, {percentile, score}, (err, doc) => {
-            if (err) {
-              console.log('err', err)
-            } else {
-              console.log(`${word} - percentile: ${percentile}, score: ${score}`)
-            }
-          })
-      })
-    })
+  const words = await WordFrequency.find({}).lean()
+  const newPercentiles = setRanksAndPercentiles(words)
+  const noIds = newPercentiles.map(({word, frequency, rank, percentile}) => ({word, frequency, rank, percentile}))
+  if (noIds.length > 0) {
+    try {
+      await WordFrequency.deleteMany({})
+      console.log('deleted main db')
+      await WordFrequency.insertMany(noIds, [{ordered: false}])
+              .then((result) => console.log(`inserted ${typeof result} words!`))
+      await WordFrequencyBackup.deleteMany({})
+      console.log('deleted backup')
+      await WordFrequencyBackup.insertMany(newPercentiles, [{ordered: false}])
+    } catch (err) {
+      console.log(err)
+    }
+  }
 }
 
 const setRanksAndPercentiles = frequencies => {

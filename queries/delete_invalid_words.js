@@ -6,8 +6,13 @@ const deleteInvalidWords = () => {
         .lean()
         .exec()
         .then(words => {
-            const badWords = words.filter(({word}) => isValidWord(word))
-            console.log(badWords.slice(0, 100))
+            return words
+                .filter(({word}) => !isValidWord(word))
+                .map(({_id}) => _id)
+        })
+        .then(badIds => {
+            WordFrequency.deleteMany({_id: {$in: badIds}}).exec()
+            .then(() => console.log('deleted lots of words'))
         })
     
     // await WordFrequency.find({}, (err, words) => {
