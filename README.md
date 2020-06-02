@@ -10,7 +10,6 @@ At this time of writing, Homebrew has MySQL version **5.7.15** as default formul
 
 To install MySQL enter : `$ brew install mysql`
 
-## Additional configuration
 ### Homebrew
 
 * Install **brew services** first : `$ brew tap homebrew/services`
