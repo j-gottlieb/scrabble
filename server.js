@@ -44,6 +44,7 @@ mongoose
 app.use('/api/games', require('./routes/api/games'));
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
+app.use('/api/docs', require('./routes/api/docs'));
 
 io.on('connection', client => {
   // CREATE GAME

@@ -1,0 +1,121 @@
+swagger: "2.0"
+info:
+  description: "fLexicon is Scrabble 2.0. Instead of getting points based on the letters you use, you are rewarded points based on how rare your word is."
+  version: "1.0.0"
+  title: "fLexicon"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "jesse.m.gottlieb@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+# host: "https://flexicon-game.herokuapp.com/"
+host: "localhost:5000/"
+basePath: "/"
+tags:
+- name: "games"
+  description: "Game data"
+  # externalDocs:
+  #   description: "Find out more"
+  #   url: "http://swagger.io"
+- name: "users"
+  description: "User data"
+schemes:
+- "http"
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        _id: string
+        board:
+          type: array
+          items: object
+            properties:
+              letter:
+                type: string
+              isValidPosition:
+                type: boolean 
+        hands:
+          type: array
+          items: object
+            properties:
+              letters:
+                type: array
+                items: string
+              playerId:
+                type: string
+        letterPool:
+          type: array
+          items: string
+        words:
+          type: array
+          items: object
+            properties:
+              word:
+                type: string
+              score:
+                type: number
+              playerId:
+                type: string
+        players:
+          type: array
+          items: object
+            properties:
+              playerId:
+                type: string
+              isOwner:
+                type: boolean
+              username:
+                type: string
+        hasBegun:
+          type: boolean
+        turnNumber:
+          type: integer
+        name:
+          type: string
+      example:
+        _id: 'abc123xid'
+        board: [{letter: 'a', isValidPosition: false}, {letter: '', isValidPosition: true}]
+        hands: [{letters: ['a', 'b', 'c', 't', 'f', 'i', 'j'], playerId: 'aksjhdf87613'}]
+        letterPool: ['a', 'a', 'a', 'b', 'b', 'c', 'd', 'e', 'e']
+        words: [{word: 'banana', score: 12, playerId: 'abc123xid'}]
+        players: [{playerId: 'abc123xid', isOwner: true, username: 'george'}]
+        hasBegun: false
+        turnNumber: 0,
+        name: 'Georges Game'
+paths:
+  api/users:
+    post:
+      tags:
+      - "users"
+      summary: "Create a new user"
+      description: ""
+      operationId: "addUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: user
+          description: The user to create.
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "400":
+          description: "Something went wrong"
+        "200":
+          description: "Successfully created user, returning all games"
+          schema:
+            type: array
+            items:
+              $ref: "#components/schemas/Game"
