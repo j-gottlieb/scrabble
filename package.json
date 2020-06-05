@@ -37,6 +37,7 @@
     "material-ui-popup-state": "^1.5.4",
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.15",
+    "mysql": "^2.18.1",
     "node-fetch": "^2.6.0",
     "react-dnd": "^10.0.2",
     "react-dnd-html5-backend": "^10.0.2",
