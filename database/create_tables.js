@@ -1,18 +1,40 @@
-const mysql = require('mysql');
+const {runQueryBatch} = require('./query_functions');
 
-const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "jisaac16"
-});
+const normalizedPath = require("path").join(__dirname, 'table_definitions');
+const env = process.env.NODE_ENV || 'development';
 
-const sql = 'SELECT * FROM flexicon.wordFrequency'
-
-connection.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-    connection.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log(result[0]);
-    });
+/**
+ * Table definitions are defined in /database/table_definitions.
+ * Each file in that dir should have a `createTableStatement` and an `insertStatement` that are exported.
+ *
+ * module.exports = {
+ *  createTableStatement,
+ *  insertStatement
+ * }
+ */
+const getTableDefinitions = () => {
+  const tableDefinitions = {
+    createTableStatements: [],
+    insertStatements: []
+  };
+  require("fs").readdirSync(normalizedPath).map(file => {
+    const {createTableStatement, insertStatement} = require("./table_definitions/" + file);
+    tableDefinitions.createTableStatements.push(createTableStatement);
+    if (insertStatement) tableDefinitions.insertStatements.push(insertStatement);
   });
+  return tableDefinitions
+}
+
+const createAndLoadTables = async () => {
+  try {
+    const {createTableStatements, insertStatements} = getTableDefinitions();
+    runQueryBatch(createTableStatements);
+    if (env === 'development') {
+      runQueryBatch(insertStatements);
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+module.exports = createAndLoadTables;
