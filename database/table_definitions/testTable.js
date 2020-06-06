@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS testTable (\
   Word VARCHAR(100) NOT NULL\
 ); '
 const insertStatement = "\
-INSERT INTO testTable \
+INSERT IGNORE INTO testTable \
 VALUES\
   ('Yeet')\
 ";

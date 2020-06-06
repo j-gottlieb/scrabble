@@ -1,3 +1,8 @@
+const {isProduction} = require('./env_helpers');
+if (!isProduction()) {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');

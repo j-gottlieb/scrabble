@@ -1,19 +1,19 @@
 const mysql = require('mysql');
+const {getEnvVar} = require('../env_helpers');
 
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "jisaac16",
-  database: "flexicon"
-};
-
-const makeDb = config => {
+const makeDb = () => {
+  const config = {
+    host: getEnvVar('DB_HOST'),
+    user: getEnvVar('DB_USER'),
+    password: getEnvVar('DB_PASSWORD'),
+    database: getEnvVar('DEFAULT_DATABASE')
+  }
   return mysql.createConnection(config);
 }
 
 const executeStatement = async (sqlString, callback) => {
   try {
-    const db = makeDb(dbConfig);
+    const db = makeDb();
     db.query(sqlString, err => {
       callback(err)
     })
