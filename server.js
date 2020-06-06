@@ -1,3 +1,8 @@
+const {isProduction} = require('./env_helpers');
+if (!isProduction()) {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -11,6 +16,9 @@ const server = http.createServer(app)
 const io = socketIO(server, {forceNew: false})
 
 const Game = require('./models/Game');
+
+const createAndLoadTables = require('./database/create_tables');
+createAndLoadTables();
 
 // Queries
 const saveNewGame = require('./queries/new_game');

@@ -26,6 +26,7 @@
     "concurrently": "^4.1.2",
     "config": "^3.3.1",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "eslint-config-airbnb": "^18.1.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.19.0",
@@ -37,6 +38,7 @@
     "material-ui-popup-state": "^1.5.4",
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.15",
+    "mysql": "^2.18.1",
     "node-fetch": "^2.6.0",
     "react-dnd": "^10.0.2",
     "react-dnd-html5-backend": "^10.0.2",
@@ -49,6 +51,7 @@
     "socket.io": "^2.3.0",
     "swagger-ui-express": "^4.1.4",
     "typo-js": "^1.1.0",
+    "util": "^0.12.3",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
