@@ -16,10 +16,9 @@ const server = http.createServer(app)
 const io = socketIO(server, {forceNew: false})
 
 const Game = require('./models/Game');
+
 const createAndLoadTables = require('./database/create_tables');
-const {testSelect} = require('./database/query_functions');
 createAndLoadTables();
-// testSelect()
 
 // Queries
 const saveNewGame = require('./queries/new_game');
@@ -53,6 +52,7 @@ mongoose
 app.use('/api/games', require('./routes/api/games'));
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
+app.use('/api/docs', require('./routes/api/docs'));
 
 io.on('connection', client => {
   // CREATE GAME

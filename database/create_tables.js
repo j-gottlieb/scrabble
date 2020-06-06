@@ -1,7 +1,5 @@
 const {runQueryBatch} = require('./query_functions');
-
-const normalizedPath = require("path").join(__dirname, 'table_definitions');
-const env = process.env.NODE_ENV || 'development';
+const {isProduction} = require('../env_helpers');
 
 /**
  * Table definitions are defined in /database/table_definitions.
@@ -13,15 +11,19 @@ const env = process.env.NODE_ENV || 'development';
  * }
  */
 const getTableDefinitions = () => {
+  const normalizedPath = require('path').join(__dirname, 'table_definitions');
+
   const tableDefinitions = {
     createTableStatements: [],
     insertStatements: []
   };
-  require("fs").readdirSync(normalizedPath).map(file => {
-    const {createTableStatement, insertStatement} = require("./table_definitions/" + file);
+
+  require('fs').readdirSync(normalizedPath).map(file => {
+    const {createTableStatement, insertStatement} = require('./table_definitions/' + file);
     tableDefinitions.createTableStatements.push(createTableStatement);
     if (insertStatement) tableDefinitions.insertStatements.push(insertStatement);
   });
+
   return tableDefinitions
 }
 
@@ -29,7 +31,7 @@ const createAndLoadTables = async () => {
   try {
     const {createTableStatements, insertStatements} = getTableDefinitions();
     runQueryBatch(createTableStatements);
-    if (env === 'development') {
+    if (!isProduction()) {
       runQueryBatch(insertStatements);
     }
   } catch (err) {
