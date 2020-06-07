@@ -11,11 +11,12 @@ const makeDb = () => {
   return mysql.createConnection(config);
 }
 
-const executeStatement = async (sqlString, callback) => {
+const executeStatement = async (sqlString, values, callback) => {
   try {
+    if (callback === undefined) callback = values;
     const db = makeDb();
-    db.query(sqlString, err => {
-      callback(err)
+    db.query(sqlString, [values], (err, result) => {
+      callback(err, result)
     })
   } catch (err) {
     console.log(err);
@@ -25,10 +26,13 @@ const executeStatement = async (sqlString, callback) => {
 
 const executeSelect = async (sqlString, callback) => {
   try {
-    const db = makeDb(dbConfig);
-    db.query(sqlString, (err, rows) => {
-      callback(err, rows)
-    })
+    const db = makeDb();
+    return new Promise((res, rej) => {
+      db.query(sqlString, (err, results) => {
+        if (err) rej(err);
+        return res(results);
+      });
+    }) 
   } catch (err) {
     console.log(err)
     callback(err)

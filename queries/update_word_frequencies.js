@@ -1,7 +1,14 @@
 const {WordFrequency, WordFrequencyBackup} = require('../models/WordFrequency')
 const rp = require('request-promise');
 const cheerio = require('cheerio');
+const {
+  incrementWordFrequencies,
+  getAllFrequencies,
+  setPercentilesFromCompleteWordData
+} = require('../database/queries/word_frequencies');
 
+
+// Constants
 const wikipediaUrl = /**'https://nytimes.com'**/ 'https://en.wikipedia.org/wiki/Special:Random'
 const flexiconUrl = 'localhost:5000/word_frequencies' || 'https://flexicon-game.herokuapp.com/word_frequencies'
 const Typo = require("typo-js");
@@ -84,61 +91,77 @@ const crawl = async (wordFrequencies, url) => {
   }
 }
 
+/**
+ * Format data to align with the table flexicon.WordFrequency
+ * 
+ * @param {Object} frequencies 
+ */
+const formatRawFrequenciesForUpsert = frequencies => (
+  Object.keys(frequencies).map(word => ([word, frequencies[word]]))
+)
+
+const formatPercentileDataForUpdate = data => (
+  data.map(({word, frequency, percentile}) => [word, frequency, percentile])
+)
+
 const updateWordFrequencies = async () => {
   // get new frequencies
   const frequencies = await recursiveCrawl()
   // Add new counts to existing counts
-  await incrementWordFrequencies(frequencies)
+  await incrementWordFrequencies(formatRawFrequenciesForUpsert(frequencies));
+  const allFrequencies = await getAllFrequencies();
+  // console.log(allFrequencies)
   // Recalculate percentiles and rankings
-  await updatePercentiles()
+  const frequenciesWithPercentile = await setRanksAndPercentiles(allFrequencies)
+  setPercentilesFromCompleteWordData(formatPercentileDataForUpdate(frequenciesWithPercentile));
 }
 
-const incrementWordFrequencies = async newFrequencies => {
-  console.log()
-  const map = {}
-  const idsToDelete = []
-  await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}})
-    .exec()
-    .then((words) => {
-      words.forEach((entry, index) => {
-        const {word, _id} = entry;
-        const count = newFrequencies[word];
-        if (!map[word]) {
-          map[word] = entry.frequency
-        } else if (map[word] > entry.frequency) {
-          entry.frequency = map[word]
-        }
-        idsToDelete.push(entry._id)
-      })
-    })
+// const incrementWordFrequencies = async newFrequencies => {
+//   console.log()
+//   const map = {}
+//   const idsToDelete = []
+//   await WordFrequency.find({word:{$in: Object.keys(newFrequencies)}})
+//     .exec()
+//     .then((words) => {
+//       words.forEach((entry, index) => {
+//         const {word, _id} = entry;
+//         const count = newFrequencies[word];
+//         if (!map[word]) {
+//           map[word] = entry.frequency
+//         } else if (map[word] > entry.frequency) {
+//           entry.frequency = map[word]
+//         }
+//         idsToDelete.push(entry._id)
+//       })
+//     })
 
-  await WordFrequency.deleteMany({_id: {$in: idsToDelete}}).exec()
+//   await WordFrequency.deleteMany({_id: {$in: idsToDelete}}).exec()
 
-  const formattedFrequencies = Object.keys(map).map(word => {
-    return {word, frequency: map[word]}
-  })
+//   const formattedFrequencies = Object.keys(map).map(word => {
+//     return {word, frequency: map[word]}
+//   })
 
-  await WordFrequency.insertMany(formattedFrequencies)
-}
+//   await WordFrequency.insertMany(formattedFrequencies)
+// }
 
-const updatePercentiles = async () => {
-  const words = await WordFrequency.find({}).lean()
-  const newPercentiles = setRanksAndPercentiles(words)
-  const noIds = newPercentiles.map(({word, frequency, rank, percentile}) => ({word, frequency, rank, percentile}))
-  if (noIds.length > 0) {
-    try {
-      await WordFrequency.deleteMany({})
-      console.log('deleted main db')
-      await WordFrequency.insertMany(noIds, [{ordered: false}])
-              .then((result) => console.log(`inserted ${typeof result} words!`))
-      await WordFrequencyBackup.deleteMany({})
-      console.log('deleted backup')
-      await WordFrequencyBackup.insertMany(newPercentiles, [{ordered: false}])
-    } catch (err) {
-      console.log(err)
-    }
-  }
-}
+// const updatePercentiles = async () => {
+//   const words = await WordFrequency.find({}).lean()
+//   const newPercentiles = setRanksAndPercentiles(words)
+//   const noIds = newPercentiles.map(({word, frequency, rank, percentile}) => ({word, frequency, rank, percentile}))
+//   if (noIds.length > 0) {
+//     try {
+//       await WordFrequency.deleteMany({})
+//       console.log('deleted main db')
+//       await WordFrequency.insertMany(noIds, [{ordered: false}])
+//               .then((result) => console.log(`inserted ${typeof result} words!`))
+//       await WordFrequencyBackup.deleteMany({})
+//       console.log('deleted backup')
+//       await WordFrequencyBackup.insertMany(newPercentiles, [{ordered: false}])
+//     } catch (err) {
+//       console.log(err)
+//     }
+//   }
+// }
 
 const setRanksAndPercentiles = frequencies => {
   const sortedWordArray = frequencies.sort((a, b) => b.frequency - a.frequency)
