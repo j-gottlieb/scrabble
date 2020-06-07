@@ -11,12 +11,14 @@ const makeDb = () => {
   return mysql.createConnection(config);
 }
 
-const executeStatement = async (sqlString, values, callback) => {
+const executeStatement = async (sqlString, values) => {
   try {
-    if (callback === undefined) callback = values;
     const db = makeDb();
-    db.query(sqlString, [values], (err, result) => {
-      callback(err, result)
+    return new Promise((res, rej) => {
+      db.query(sqlString, [values], (err, result) => {
+        if (err) rej(err)
+        return res(result)
+      })
     })
   } catch (err) {
     console.log(err);
@@ -24,11 +26,11 @@ const executeStatement = async (sqlString, values, callback) => {
   }
 }
 
-const executeSelect = async (sqlString, callback) => {
+const executeSelect = async (sqlString, values) => {
   try {
     const db = makeDb();
     return new Promise((res, rej) => {
-      db.query(sqlString, (err, results) => {
+      db.query(sqlString, [values], (err, results) => {
         if (err) rej(err);
         return res(results);
       });
@@ -42,16 +44,9 @@ const executeSelect = async (sqlString, callback) => {
 const runQueryBatch = async queryBatch => {
   const promises = [];
   for (const sql of queryBatch) {
-    promises.push(new Promise((res, rej) => {
-      executeStatement(sql, err => {
-        if (err) {
-          console.log(err);
-          rej(err)
-        }
-        console.log('Successfully ran sql: ' + sql);
-        res(true)
-      })
-    }))
+    promises.push(
+      executeStatement(sql).then(result => console.log(result.affectedRows))
+    )
   }
   return await Promise.all(promises);
 }

@@ -17,6 +17,7 @@ const io = socketIO(server, {forceNew: false})
 
 const Game = require('./models/Game');
 
+process.setMaxListeners(0);
 const createAndLoadTables = require('./database/create_tables');
 createAndLoadTables();
 

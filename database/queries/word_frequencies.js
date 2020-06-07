@@ -13,10 +13,11 @@ INSERT INTO flexicon.wordFrequency (Word, Frequency) VALUES ? \
 ON DUPLICATE KEY UPDATE \
 Frequency = Frequency + VALUES(Frequency);\
 `;
-    await executeStatement(sql, newFrequencies, (err, result) => {
-        if (err) console.log(err)
-        console.log(result.affectedRows);
-    });
+    await executeStatement(sql, newFrequencies)
+        .then(result => {
+            console.log(result.affectedRows);
+        })
+        .catch(err => console.log(err))
 }
 
 const getAllFrequencies = async () => {
@@ -41,28 +42,18 @@ PRIMARY KEY (word)\
 );\
 `;
 
-    return new Promise((res, rej) => {
-        executeStatement(tempTableSql, null, (err, result) => {
-            if (err) rej(err)
-            res(result.affectedRows)
-            console.log('tempTable');
-        });
-    })
+    return executeStatement(tempTableSql)
+        .then(result => ({result, name: 'create'}))
 }
 
 const insertIntoTempTable = async (wordData) => {
     const tempTableInsertSql = `\
-    INSERT INTO percentileData (Word, Frequency, FrequencyPercentile) \
-        VALUES ?;
+INSERT INTO percentileData (Word, Frequency, FrequencyPercentile) \
+VALUES ?;
     `;
     
-    return new Promise((res, rej) => {
-        executeStatement(tempTableInsertSql, wordData, (err, result) => {
-            if (err) console.log(err)
-            res(result.affectedRows)
-            console.log(result.affectedRows, 'insert');
-        });
-    })
+    return executeStatement(tempTableInsertSql, wordData)
+        .then(result => ({result, name: 'insert'}))
 }
 
 const updatePercentiles = async () => {
@@ -73,39 +64,27 @@ SET old.FrequencyPercentile = new.FrequencyPercentile \
 WHERE new.Word IS NOT NULL;
 `;
 
-    return new Promise((res, rej) => {
-        executeStatement(updateSql, null, (err, result) => {
-            if (err) console.log(err)
-            res(result.affectedRows)
-            console.log(result.affectedRows, 'update');
-        });
-    });
+    return executeStatement(updateSql)
+        .then(result => ({result, name: 'update'}))
 }
 
 const dropTempTable = async () => {
     const dropTempTable = `DROP TABLE percentileData;`;
 
-    return new Promise((res, rej) => {
-        executeStatement(dropTempTable, null, (err, result) => {
-            if (err) console.log(err)
-            res(result.affectedRows)
-            console.log(result.affectedRows, 'drop');
-        });
-    })
+
+    return executeStatement(dropTempTable)
+        .then(result => ({result, name: 'drop'}))
 }
 
 const setPercentilesFromCompleteWordData = async wordData => {
-    const promisified = () => (
-        new Promise((res, rej) => {
-            const thing =ç insertIntoTempTable(wordData)
-            res(thing);
-        })
-    )
-    const asyncList = [createTempTable, promisified, updatePercentiles, dropTempTable];
+    const asyncList = [createTempTable, () => insertIntoTempTable(wordData), updatePercentiles, dropTempTable];
     const starterPromise = Promise.resolve(null);
 
     await asyncList.reduce(
-        (promise, fn) => promise.then(() => fn()),
+        (promise, fn) => promise
+            .then(() => fn()
+            .then(result => console.log(`${result.name} affected ${result.result.affectedRows} rows`)))
+            .catch(err => console.log(err)),
         starterPromise
     );
 }

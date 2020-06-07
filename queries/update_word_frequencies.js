@@ -65,7 +65,7 @@ const getRandomUrl = (html) => {
   return url
 }
 
-const maxAttempts = 10
+const maxAttempts = 5
 let attemptCount = 0
 
 const recursiveCrawl = async () => {
